@@ -1,0 +1,37 @@
+# Exclude maple-font reference project
+maple-font/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.uv/
+
+# Build outputs
+output/
+*.ttf
+!fonts/*.ttf
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# uv lock file (optional, uncomment if you want to track it)
+# uv.lock
