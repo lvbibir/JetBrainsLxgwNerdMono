@@ -93,13 +93,32 @@ def merge_fonts(
     cn_hmtx = cn_font["hmtx"]
     base_cmap = base_font["cmap"].getBestCmap()
 
-    # Check unitsPerEm for scaling
+    # Calculate scaling factors
     base_upm = base_font["head"].unitsPerEm
     cn_upm = cn_font["head"].unitsPerEm
-    scale_factor = base_upm / cn_upm if base_upm != cn_upm else 1.0
 
-    if scale_factor != 1.0:
-        print(f"  Scaling CN glyphs by {scale_factor:.4f} (UPM: {cn_upm} -> {base_upm})")
+    # Strategy:
+    # LXGW WenKai Mono glyphs don't fill the entire em square
+    # - UPM: 2048
+    # - Actual glyph width: ~1724 (average of CJK characters)
+    # - After UPM normalization to 1000: ~841
+    #
+    # We want final glyph width ~809 (like MapleMono, ~67% of 1200 advance)
+    # So scale factor: 809 / 841 = 0.962
+    #
+    # But we need to be conservative to avoid overflow
+    # Let's target ~800 width (2/3 of 1200 advance)
+
+    upm_scale = base_upm / cn_upm  # 1000 / 2048 = 0.4883
+
+    # After UPM scale, average LXGW glyph is: 1724 * 0.4883 = 841 units
+    # Target: ~860 units (similar to MapleMono's ~809-918 range)
+    # Visual scale: 860 / 841 = 1.023
+    visual_scale = 1.02
+
+    combined_scale = upm_scale * visual_scale
+
+    print(f"  Scaling CN glyphs by {combined_scale:.4f} (UPM: {cn_upm} -> {base_upm}, visual: {visual_scale:.2f}x)")
 
     glyphs_added = []
 
@@ -112,24 +131,26 @@ def merge_fonts(
         if glyph_name not in cn_glyf.glyphs:
             continue
 
-        # Copy glyph outline
-        glyph = cn_glyf.glyphs[glyph_name]
+        # Copy glyph outline (deep copy to avoid modifying source font)
+        # IMPORTANT: Use cn_glyf[name] instead of cn_glyf.glyphs[name]
+        # The latter returns undecompiled glyph without coordinates attribute
+        import copy
+        glyph = copy.deepcopy(cn_glyf[glyph_name])
         base_glyf.glyphs[glyph_name] = glyph
 
-        # Scale glyph if needed
-        if scale_factor != 1.0 and hasattr(glyph, "coordinates") and glyph.numberOfContours > 0:
-            glyph.coordinates.scale((scale_factor, scale_factor))
+        # Scale glyph to fit target width
+        if hasattr(glyph, "coordinates") and glyph.numberOfContours > 0:
+            # Ensure bounds are calculated before scaling
+            if not hasattr(glyph, 'xMin') or glyph.xMin is None:
+                glyph.recalcBounds(base_glyf)
+
+            # Apply combined scaling
+            glyph.coordinates.scale((combined_scale, combined_scale))
             glyph.recalcBounds(base_glyf)
 
         # Set advance width to cn_width (1200) for 2:1 ratio
-        if glyph_name in cn_hmtx.metrics:
-            _, lsb = cn_hmtx.metrics[glyph_name]
-            # Scale LSB if needed
-            if scale_factor != 1.0:
-                lsb = int(round(lsb * scale_factor))
-            base_hmtx.metrics[glyph_name] = (config.cn_width, lsb)
-        else:
-            base_hmtx.metrics[glyph_name] = (config.cn_width, 0)
+        # LSB will be recalculated in center_cjk_glyphs()
+        base_hmtx.metrics[glyph_name] = (config.cn_width, 0)
 
         glyphs_added.append(glyph_name)
 
