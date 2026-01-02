@@ -9,7 +9,7 @@ class FontConfig:
     """Configuration for font building."""
 
     # Font naming
-    family_name: str = "JetBrainsLxgw Nerd Mono"
+    family_name: str = "JetBrainsLxgwNerdMono"
     family_name_compact: str = "JetBrainsLxgwNerdMono"
     version: str = "1.0"
 
