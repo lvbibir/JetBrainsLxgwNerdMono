@@ -1,5 +1,7 @@
 # JetBrainsLxgwNerdMono
 
+[English](README.md) | [中文](README_zh.md)
+
 JetBrains Mono NerdFont + LXGW WenKai Mono = 2:1 CJK Monospace Font
 
 ## Features
@@ -95,6 +97,10 @@ options:
 ├── Dockerfile              # Docker build
 └── README.md
 ```
+
+## Acknowledgments
+
+This project was inspired by and references the implementation approach from [maple-font](https://github.com/subframe7536/maple-font).
 
 ## License
 
