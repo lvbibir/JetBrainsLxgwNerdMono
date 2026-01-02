@@ -65,6 +65,14 @@ Built fonts are saved to `output/`:
 - `JetBrainsLxgwNerdMono-Italic.ttf`
 - `JetBrainsLxgwNerdMono-MediumItalic.ttf`
 
+## 2:1 Ratio Verification
+
+To verify the perfect 2:1 width ratio between CJK and English characters, open `verify-2-1.html` in your browser after building the fonts.
+
+![2:1 Ratio Verification](resources/2-1.png)
+
+The vertical bars (`|`) should align perfectly across all lines, demonstrating that each CJK character occupies exactly twice the width of an English character.
+
 ## Command Line Options
 
 ```

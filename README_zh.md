@@ -65,6 +65,14 @@ docker run --rm \
 - `JetBrainsLxgwNerdMono-Italic.ttf`
 - `JetBrainsLxgwNerdMono-MediumItalic.ttf`
 
+## 2:1 比例验证
+
+构建字体后,在浏览器中打开 `verify-2-1.html` 即可验证中英文字符的完美 2:1 宽度比例。
+
+![2:1 比例验证](resources/2-1.png)
+
+竖线 (`|`) 应该在所有行之间完美对齐,展示每个中文字符的宽度恰好是英文字符的两倍。
+
 ## 命令行选项
 
 ```
