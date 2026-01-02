@@ -14,13 +14,18 @@ def set_font_name(font: TTFont, name: str, name_id: int, mac: bool = False) -> N
         name_id: Name table ID
         mac: Whether to also set Mac platform entry
     """
+    name_table = font["name"]
+
+    # Remove all existing entries for this nameID to avoid conflicts
+    name_table.removeNames(nameID=name_id)
+
     # Windows platform
-    font["name"].setName(
+    name_table.setName(
         name, nameID=name_id, platformID=3, platEncID=1, langID=0x409
     )
     # Mac platform (optional)
     if mac:
-        font["name"].setName(
+        name_table.setName(
             name, nameID=name_id, platformID=1, platEncID=0, langID=0x0
         )
 
@@ -52,11 +57,10 @@ def update_font_names(
     set_font_name(font, version_str, 5)  # Version string
     set_font_name(font, postscript_name, 6)  # PostScript name
 
-    # Preferred family/style (NameID 16, 17) for non-standard styles
-    if style_name not in ("Regular", "Bold", "Italic", "Bold Italic"):
-        base_style = style_name.replace(" Italic", "")
-        set_font_name(font, family_name.replace(f" {base_style}", ""), 16)
-        set_font_name(font, style_name, 17)
+    # Set Preferred family/style (NameID 16, 17) for better Windows compatibility
+    # For non-standard styles (Medium, MediumItalic), these ensure proper display
+    set_font_name(font, family_name, 16)  # Preferred Family
+    set_font_name(font, style_name, 17)  # Preferred Subfamily
 
 
 def is_cjk_codepoint(
