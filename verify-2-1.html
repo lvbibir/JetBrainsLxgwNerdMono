@@ -12,27 +12,22 @@
 
         body {
             margin: 0;
-            padding: 40px;
+            padding: 0;
             background-color: #1e1e1e;
             color: #d4d4d4;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .title {
-            font-family: 'JetBrainsLxgwNerdMono', monospace;
-            font-size: 32px;
-            text-align: center;
-            margin-bottom: 40px;
-            letter-spacing: 0.05em;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding-top: 15vh;
         }
 
         .content {
             font-family: 'JetBrainsLxgwNerdMono', monospace;
-            font-size: 24px;
+            font-size: 3vw;
             line-height: 1.8;
             white-space: pre;
             letter-spacing: 0;
@@ -45,8 +40,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="title">————————————中英文2:1————————————</div>
-        <div class="content">|ab|cd|ef|gh|ij|kl|mn|op|qr|st|uv|wx|yz|
+        <div class="content">----------------中英文2:1---------------
+|ab|cd|ef|gh|ij|kl|mn|op|qr|st|uv|wx|yz|
 |这|应|该|是|中|英|文|完|美|的|2:|1等距|
 |A0|1!|2@|3#|4$|5%|6^|7&|8*|9(|0)|=+|[]|</div>
     </div>
