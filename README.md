@@ -50,10 +50,19 @@ docker run --rm \
 
 Place the following fonts in the `fonts/` directory:
 
+### JetBrains Mono NerdFont (v3.4.0)
+
+Download from [Nerd Fonts release](https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip), extract and place these files:
+
 - `JetBrainsMonoNLNerdFontMono-Regular.ttf`
 - `JetBrainsMonoNLNerdFontMono-Medium.ttf`
 - `JetBrainsMonoNLNerdFontMono-Italic.ttf`
 - `JetBrainsMonoNLNerdFontMono-MediumItalic.ttf`
+
+### LXGW WenKai Mono GB Screen (v1.521)
+
+Download directly: [LXGWWenKaiMonoGBScreen.ttf](https://github.com/lxgw/LxgwWenKai-Screen/releases/download/v1.521/LXGWWenKaiMonoGBScreen.ttf)
+
 - `LXGWWenKaiMonoGBScreen.ttf`
 
 ## Output

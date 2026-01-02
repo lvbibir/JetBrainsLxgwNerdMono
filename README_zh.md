@@ -50,10 +50,19 @@ docker run --rm \
 
 请将以下字体文件放置在 `fonts/` 目录:
 
+### JetBrains Mono NerdFont (v3.4.0)
+
+从 [Nerd Fonts 发布页面](https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip) 下载,解压后放置以下文件:
+
 - `JetBrainsMonoNLNerdFontMono-Regular.ttf`
 - `JetBrainsMonoNLNerdFontMono-Medium.ttf`
 - `JetBrainsMonoNLNerdFontMono-Italic.ttf`
 - `JetBrainsMonoNLNerdFontMono-MediumItalic.ttf`
+
+### LXGW 文楷等宽 GB Screen (v1.521)
+
+直接下载: [LXGWWenKaiMonoGBScreen.ttf](https://github.com/lxgw/LxgwWenKai-Screen/releases/download/v1.521/LXGWWenKaiMonoGBScreen.ttf)
+
 - `LXGWWenKaiMonoGBScreen.ttf`
 
 ## 输出
