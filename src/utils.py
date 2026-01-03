@@ -50,12 +50,50 @@ def update_font_names(
     """
     unique_id = f"{version_str};JBLXGW;{postscript_name}"
 
-    set_font_name(font, family_name, 1)  # Family name
-    set_font_name(font, style_name, 2)  # Subfamily name
-    set_font_name(font, unique_id, 3)  # Unique ID
-    set_font_name(font, full_name, 4)  # Full name
-    set_font_name(font, version_str, 5)  # Version string
-    set_font_name(font, postscript_name, 6)  # PostScript name
+    # Author and project info
+    author = "lvbibir"
+    project_url = "https://github.com/lvbibir/JetBrainsLxgwNerdMono"
+    copyright_str = f"Copyright (c) 2024 {author}"
+    description = (
+        "JetBrains Mono NerdFont + LXGW WenKai Mono merged font with 2:1 CJK ratio. "
+        "English from JetBrains Mono, CJK from LXGW WenKai."
+    )
+    license_desc = (
+        "This font is licensed under the SIL Open Font License, Version 1.1. "
+        "JetBrains Mono: OFL-1.1, LXGW WenKai: OFL-1.1, Nerd Fonts: MIT."
+    )
+    license_url = "https://openfontlicense.org"
+
+    # NameID 0: Copyright
+    set_font_name(font, copyright_str, 0)
+    # NameID 1: Family name
+    set_font_name(font, family_name, 1)
+    # NameID 2: Subfamily name
+    set_font_name(font, style_name, 2)
+    # NameID 3: Unique ID
+    set_font_name(font, unique_id, 3)
+    # NameID 4: Full name
+    set_font_name(font, full_name, 4)
+    # NameID 5: Version string
+    set_font_name(font, version_str, 5)
+    # NameID 6: PostScript name
+    set_font_name(font, postscript_name, 6)
+    # NameID 7: Trademark (clear it)
+    set_font_name(font, "", 7)
+    # NameID 8: Manufacturer
+    set_font_name(font, author, 8)
+    # NameID 9: Designer
+    set_font_name(font, author, 9)
+    # NameID 10: Description
+    set_font_name(font, description, 10)
+    # NameID 11: Vendor URL
+    set_font_name(font, project_url, 11)
+    # NameID 12: Designer URL
+    set_font_name(font, project_url, 12)
+    # NameID 13: License description
+    set_font_name(font, license_desc, 13)
+    # NameID 14: License URL
+    set_font_name(font, license_url, 14)
 
     # Set Preferred family/style (NameID 16, 17) for better Windows compatibility
     # For non-standard styles (Medium, MediumItalic), these ensure proper display
