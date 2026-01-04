@@ -1,4 +1,5 @@
 import argparse
+import re
 import sys
 import json
 import shutil
@@ -14,10 +15,56 @@ from src.config import FontConfig
 
 logger = logging.getLogger(__name__)
 
+# Mapping from style key to display name for local() matching
+STYLE_DISPLAY_NAMES = {
+    "Regular": "Regular",
+    "Medium": "Medium",
+    "Italic": "Italic",
+    "MediumItalic": "Medium Italic",
+}
+
 
 def check_cn_font_split_installed() -> bool:
     """Check if cn-font-split is installed."""
     return shutil.which("cn-font-split") is not None
+
+
+def enhance_local_font_matching(css_path: Path, family_name: str, style_key: str) -> None:
+    """Enhance local() values in CSS for better local font matching.
+
+    Browsers may use different font names for local() matching:
+    - Family name: "JetBrainsLxgwNerdMono"
+    - Full name: "JetBrainsLxgwNerdMono Regular"
+    - PostScript name: "JetBrainsLxgwNerdMono-Regular"
+
+    This function replaces single local() with multiple local() values.
+    """
+    if not css_path.exists():
+        logger.warning(f"CSS file not found: {css_path}")
+        return
+
+    display_name = STYLE_DISPLAY_NAMES.get(style_key, "Regular")
+    # PostScript name uses hyphen, no space
+    postscript_name = f"{family_name}-{style_key}"
+    # Full name uses space
+    full_name = f"{family_name} {display_name}"
+
+    # Build replacement with multiple local() values
+    # Order: PostScript name first (most specific), then full name, then family name
+    local_values = f'local("{postscript_name}"),local("{full_name}"),local("{family_name}")'
+
+    content = css_path.read_text(encoding="utf-8")
+
+    # Replace local("FamilyName") with multiple local() values
+    # Pattern matches: local("FamilyName"),url(
+    pattern = rf'local\("{re.escape(family_name)}"\),url\('
+    replacement = f'{local_values},url('
+
+    new_content = re.sub(pattern, replacement, content)
+
+    if new_content != content:
+        css_path.write_text(new_content, encoding="utf-8")
+        logger.info(f"Enhanced local() matching in {css_path.name}")
 
 
 def split_font(
@@ -87,6 +134,10 @@ def split_font(
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to split {font_name}: {e.stderr}")
         raise
+
+    # Enhance local() matching in generated CSS
+    css_path = output_dir / "result.css"
+    enhance_local_font_matching(css_path, config.family_name, style_key or "Regular")
 
     return output_dir
 
