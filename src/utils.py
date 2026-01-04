@@ -5,25 +5,26 @@ from typing import List, Tuple
 from fontTools.ttLib import TTFont
 
 
-def set_font_name(font: TTFont, name: str, name_id: int, mac: bool = False) -> None:
+def set_font_name(font: TTFont, name: str, name_id: int, mac: bool = True) -> None:
     """Set font name entry.
 
     Args:
         font: TTFont object
         name: Name string to set
         name_id: Name table ID
-        mac: Whether to also set Mac platform entry
+        mac: Whether to also set Mac platform entry (default True for macOS compatibility)
     """
     name_table = font["name"]
 
     # Remove all existing entries for this nameID to avoid conflicts
     name_table.removeNames(nameID=name_id)
 
-    # Windows platform
+    # Windows platform (platformID=3, platEncID=1 = Unicode BMP)
     name_table.setName(
         name, nameID=name_id, platformID=3, platEncID=1, langID=0x409
     )
-    # Mac platform (optional)
+    # Mac platform (platformID=1, platEncID=0 = Roman, langID=0 = English)
+    # Required for macOS Font Book validation
     if mac:
         name_table.setName(
             name, nameID=name_id, platformID=1, platEncID=0, langID=0x0
