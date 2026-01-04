@@ -4,20 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JetBrainsLxgwNerdMono (Split) 2:1 Ratio Verification</title>
-    <!-- 引入分包后的 CSS -->
-    <link rel="stylesheet" href="output/split/all.css">
+    <!-- Split CSS will be loaded dynamically -->
     <style>
-        /* CSS 变量定义不同的字体族名称，与 cn-font-split 生成的名称对应 */
-        /* 根据 cn-font-split 配置，fontFamily 可能是统一的，通过 weight/style 区分 */
-        /* 或者 split.py 可能会为不同变体生成不同的 css 文件，我们需要确认 split.py 的行为 */
-        /* 查看 split.py 源码发现：--css.fontFamily config.family_name (即 JetBrainsLxgwNerdMono) */
-        /* 但是不同变体通过 fontWeight 和 fontStyle 区分 */
-
-        /* Regular: weight 400, style normal */
-        /* Medium: weight 500, style normal */
-        /* Italic: weight 400, style italic */
-        /* MediumItalic: weight 500, style italic */
-
         body {
             margin: 0;
             padding: 0;
@@ -78,16 +66,24 @@
         .separator {
             color: #666;
         }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            color: #888;
+        }
+
+        .error {
+            color: #f44;
+        }
     </style>
 </head>
 <body>
     <div class="controls">
         <label for="weight-select">字重 / Weight:</label>
         <select id="weight-select">
-            <option value="Regular" selected>Regular</option>
-            <option value="Medium">Medium</option>
-            <option value="Italic">Italic</option>
-            <option value="MediumItalic">Medium Italic</option>
+            <option value="">Loading...</option>
         </select>
     </div>
 
@@ -96,31 +92,118 @@
 |ab|cd|ef|gh|ij|kl|mn|op|qr|st|uv|wx|yz|
 |这|应|该|是|中|英|文|完|美|的|2:|1等距|
 |A0|1!|2@|3#|4$|5%|6^|7&|8*|9(|0)|=+|[]|
-|󰈹|󰊕||󰀘|󰊤|󰍉|󰏔|󰖟|󰚩|󰌠|󰃻|󰜴|󰒍|</div>
+|󰈹|󰊕||󰀘|󰊤|󰍉|󰏔|󰖟|󰚩|󰌠|󰃻|󰜴|󰒍|</div>
     </div>
 
     <script>
+        const MANIFEST_PATH = 'output/fonts/fonts-manifest.json';
+        const SPLIT_CSS_PATH = 'output/split/all.css';
+
         const weightSelect = document.getElementById('weight-select');
         const displayText = document.getElementById('display-text');
 
-        weightSelect.addEventListener('change', function() {
-            const weight = this.value;
+        // Store loaded font info
+        let loadedFonts = null;
 
-            // 根据选择调整 font-weight 和 font-style
-            if (weight === 'Regular') {
-                displayText.style.fontWeight = '400';
-                displayText.style.fontStyle = 'normal';
-            } else if (weight === 'Medium') {
-                displayText.style.fontWeight = '500';
-                displayText.style.fontStyle = 'normal';
-            } else if (weight === 'Italic') {
-                displayText.style.fontWeight = '400';
-                displayText.style.fontStyle = 'italic';
-            } else if (weight === 'MediumItalic') {
-                displayText.style.fontWeight = '500';
-                displayText.style.fontStyle = 'italic';
+        // Weight mapping: style -> { weight, style }
+        const WEIGHT_MAP = {
+            'Regular': { weight: 400, style: 'normal' },
+            'Medium': { weight: 500, style: 'normal' },
+            'Italic': { weight: 400, style: 'italic' },
+            'MediumItalic': { weight: 500, style: 'italic' },
+            'Bold': { weight: 700, style: 'normal' },
+            'BoldItalic': { weight: 700, style: 'italic' },
+            'Light': { weight: 300, style: 'normal' },
+            'LightItalic': { weight: 300, style: 'italic' }
+        };
+
+        // Load split CSS
+        function loadSplitCSS() {
+            return new Promise((resolve, reject) => {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = SPLIT_CSS_PATH;
+                link.onload = resolve;
+                link.onerror = () => reject(new Error('Failed to load split CSS'));
+                document.head.appendChild(link);
+            });
+        }
+
+        // Populate select dropdown
+        function populateSelect(fonts) {
+            weightSelect.innerHTML = '';
+
+            fonts.forEach((font, index) => {
+                const option = document.createElement('option');
+                option.value = font.style;
+                option.textContent = font.display_name;
+                if (index === 0) option.selected = true;
+                weightSelect.appendChild(option);
+            });
+
+            // Apply first font
+            if (fonts.length > 0) {
+                applyFont(fonts[0].style);
             }
+        }
+
+        // Apply selected font weight and style
+        function applyFont(style) {
+            const mapping = WEIGHT_MAP[style] || { weight: 400, style: 'normal' };
+            displayText.style.fontWeight = mapping.weight;
+            displayText.style.fontStyle = mapping.style;
+        }
+
+        // Load manifest and initialize
+        async function init() {
+            try {
+                // Try to load split CSS first
+                await loadSplitCSS();
+
+                // Load manifest
+                const response = await fetch(MANIFEST_PATH);
+                if (!response.ok) {
+                    throw new Error(`Failed to load manifest: ${response.status}`);
+                }
+
+                const manifest = await response.json();
+                loadedFonts = manifest;
+
+                // Populate dropdown
+                populateSelect(manifest.fonts);
+
+                // Update page title and font family
+                document.title = `${manifest.family_name} (Split) 2:1 Ratio Verification`;
+                displayText.style.fontFamily = `'${manifest.family_name}', monospace`;
+
+            } catch (error) {
+                console.error('Error loading fonts:', error);
+
+                // Fallback mode
+                fallbackMode();
+            }
+        }
+
+        // Fallback mode when manifest is not available
+        function fallbackMode() {
+            const defaultFonts = [
+                { style: 'Regular', display_name: 'Regular' },
+                { style: 'Medium', display_name: 'Medium' },
+                { style: 'Italic', display_name: 'Italic' },
+                { style: 'MediumItalic', display_name: 'Medium Italic' }
+            ];
+
+            loadedFonts = { family_name: 'JetBrainsLxgwNerdMono', fonts: defaultFonts };
+            populateSelect(defaultFonts);
+        }
+
+        // Event listener for weight change
+        weightSelect.addEventListener('change', function() {
+            applyFont(this.value);
         });
+
+        // Initialize on page load
+        init();
     </script>
 </body>
 </html>

@@ -1,0 +1,59 @@
+# JetBrainsLxgwNerdMono Build Configuration
+
+# Font metadata
+font:
+  family_name: "JetBrainsLxgwNerdMono"
+  version: "1.0"
+
+# Source fonts
+source:
+  # English font filename prefix (files should be named as {prefix}-{style}.ttf)
+  en_font_prefix: "JetBrainsMonoNLNerdFontMono"
+  # Chinese font filename prefix (for multi-weight mode)
+  # Files should be named as {prefix}-{weight}.ttf
+  # cn_font_prefix: "LXGWWenKaiMonoGBScreen"
+  # Chinese font filename (for single-weight mode, used when cn_weight_mapping is not set)
+  cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+  # Source fonts directory
+  fonts_dir: "fonts"
+
+# Weight mapping: style -> display_name
+# Defines available font styles and their display names in font metadata
+# English font files: {en_font_prefix}-{style}.ttf
+weight_mapping:
+  Regular: "Regular"
+  Italic: "Italic"
+  Medium: "Medium"
+  MediumItalic: "Medium Italic"
+  # Add more weights as needed:
+  Bold: "Bold"
+  BoldItalic: "Bold Italic"
+  # Light: "Light"
+  # LightItalic: "Light Italic"
+
+# Chinese font weight mapping (optional)
+# Maps English font styles to Chinese font weights
+# If not set, all styles will use the same cn_font file
+# File naming: {cn_font_prefix}-{cn_weight}.ttf
+#
+# Example for multi-weight Chinese fonts:
+# cn_weight_mapping:
+#   Regular: "Regular"       # -> {cn_font_prefix}-Regular.ttf
+#   Italic: "Regular"        # -> {cn_font_prefix}-Regular.ttf
+#   Medium: "Medium"         # -> {cn_font_prefix}-Medium.ttf
+#   MediumItalic: "Medium"   # -> {cn_font_prefix}-Medium.ttf
+#   Bold: "Medium"           # fallback to Medium if Bold not available
+
+# Build options
+build:
+  # Comma-separated styles to build (must be defined in weight_mapping)
+  styles: "Regular,Medium,Italic,MediumItalic,Bold,BoldItalic"
+  # Output directory
+  output_dir: "output/fonts"
+  # Number of parallel workers (1 = sequential)
+  parallel: 1
+
+# Glyph width configuration (2:1 ratio)
+width:
+  en_width: 600   # English character width
+  cn_width: 1200  # CJK character width (2x)

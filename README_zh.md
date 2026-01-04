@@ -10,7 +10,9 @@ JetBrains Mono NerdFont + LXGW WenKai Mono = 2:1 中英文等宽字体
 - 中日韩 (CJK) 字符来自 LXGW 文楷等宽 (GB Screen 版本)
 - 保留 NerdFont 图标
 - 完美 2:1 宽度比例 (中文 1200, 英文 600 FUnit)
-- 字重: Regular, Medium, Italic, MediumItalic
+- 字重: Regular, Medium, Italic, MediumItalic, Bold, BoldItalic
+- 支持 YAML 配置文件, 可通过命令行覆盖
+- 支持多字重中文字体映射 (可选)
 
 ## 快速开始
 
@@ -59,6 +61,8 @@ docker run --rm \
 - `JetBrainsMonoNLNerdFontMono-Medium.ttf`
 - `JetBrainsMonoNLNerdFontMono-Italic.ttf`
 - `JetBrainsMonoNLNerdFontMono-MediumItalic.ttf`
+- `JetBrainsMonoNLNerdFontMono-Bold.ttf`
+- `JetBrainsMonoNLNerdFontMono-BoldItalic.ttf`
 
 ### LXGW 文楷等宽 GB Screen (v1.521)
 
@@ -117,6 +121,8 @@ uv run python -m http.server 8000
 # 然后访问 http://localhost:8000/verify-2-1.html
 ```
 
+验证页面现已支持通过下拉菜单切换不同的字重。
+
 对于分包后的 Web 字体，请访问 `http://localhost:8000/verify-2-1-split.html` 进行验证。
 
 或者构建字体后直接在浏览器中打开 `verify-2-1.html`。
@@ -130,16 +136,74 @@ uv run python -m http.server 8000
 ### 构建脚本 (build.py)
 
 ```
-用法: build.py [-h] [--styles STYLES] [--fonts-dir FONTS_DIR]
+用法: build.py [-h] [--config CONFIG] [--styles STYLES] [--fonts-dir FONTS_DIR]
                 [--output-dir OUTPUT_DIR] [--parallel PARALLEL]
-                [--cn-font CN_FONT]
+                [--cn-font CN_FONT] [--en-font-prefix EN_FONT_PREFIX]
 
 选项:
-  --styles STYLES         逗号分隔的字重列表 (默认: 全部)
+  --config CONFIG         配置文件路径 (默认: config.yaml)
+  --styles STYLES         逗号分隔的字重列表 (默认: 从配置文件读取)
   --fonts-dir FONTS_DIR   源字体目录 (默认: fonts/)
   --output-dir OUTPUT_DIR 输出目录 (默认: output/fonts/)
   --parallel PARALLEL     并行工作进程数 (默认: 1)
   --cn-font CN_FONT       中文字体文件名
+  --en-font-prefix EN_FONT_PREFIX  英文字体文件名前缀
+```
+
+配置优先级: 命令行参数 > config.yaml > 默认值
+
+## 配置文件
+
+`config.yaml` 文件提供集中式的构建配置:
+
+```yaml
+# 字体元数据
+font:
+  family_name: "JetBrainsLxgwNerdMono"
+  version: "1.0"
+
+# 源字体
+source:
+  en_font_prefix: "JetBrainsMonoNLNerdFontMono"  # 英文字体文件名前缀
+  cn_font: "LXGWWenKaiMonoGBScreen.ttf"          # 中文字体文件名
+  fonts_dir: "fonts"
+
+# 字重映射: 样式 -> 显示名称
+weight_mapping:
+  Regular: "Regular"
+  Italic: "Italic"
+  Medium: "Medium"
+  MediumItalic: "Medium Italic"
+  Bold: "Bold"
+  BoldItalic: "Bold Italic"
+
+# 构建选项
+build:
+  styles: "Regular,Medium,Italic,MediumItalic,Bold,BoldItalic"
+  output_dir: "output/fonts"
+  parallel: 1
+
+# 字形宽度配置 (2:1 比例)
+width:
+  en_width: 600
+  cn_width: 1200
+```
+
+### 多字重中文字体支持
+
+如果中文字体有多个字重, 可以配置 `cn_font_prefix` 和 `cn_weight_mapping`:
+
+```yaml
+source:
+  cn_font_prefix: "LXGWWenKaiMonoGBScreen"  # 文件: {prefix}-{weight}.ttf
+
+cn_weight_mapping:
+  Regular: "Regular"      # -> LXGWWenKaiMonoGBScreen-Regular.ttf
+  Italic: "Regular"
+  Medium: "Medium"        # -> LXGWWenKaiMonoGBScreen-Medium.ttf
+  MediumItalic: "Medium"
+  Bold: "Medium"          # 如果没有 Bold 则回退到 Medium
+  BoldItalic: "Medium"
 ```
 
 ### 分包脚本 (split.py)
@@ -159,6 +223,7 @@ uv run python -m http.server 8000
 ├── fonts/                  # 源字体
 ├── output/                 # 输出目录
 │   ├── fonts/              # 生成的 TTF 字体
+│   │   └── fonts-manifest.json  # 字体元数据(用于验证页面)
 │   └── split/              # 生成的 Web 字体 (WOFF2)
 ├── src/
 │   ├── __init__.py
@@ -167,6 +232,7 @@ uv run python -m http.server 8000
 │   └── utils.py            # 工具函数
 ├── build.py                # 主构建脚本
 ├── split.py                # 字体分包脚本
+├── config.yaml             # 构建配置
 ├── pyproject.toml          # Python 项目配置
 ├── Dockerfile              # Docker 构建
 └── README.md

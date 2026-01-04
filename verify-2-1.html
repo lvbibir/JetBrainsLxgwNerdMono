@@ -5,23 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JetBrainsLxgwNerdMono 2:1 Ratio Verification</title>
     <style>
-        @font-face {
-            font-family: 'JetBrainsLxgwNerdMono-Regular';
-            src: url('output/fonts/JetBrainsLxgwNerdMono-Regular.ttf') format('truetype');
-        }
-        @font-face {
-            font-family: 'JetBrainsLxgwNerdMono-Medium';
-            src: url('output/fonts/JetBrainsLxgwNerdMono-Medium.ttf') format('truetype');
-        }
-        @font-face {
-            font-family: 'JetBrainsLxgwNerdMono-Italic';
-            src: url('output/fonts/JetBrainsLxgwNerdMono-Italic.ttf') format('truetype');
-        }
-        @font-face {
-            font-family: 'JetBrainsLxgwNerdMono-MediumItalic';
-            src: url('output/fonts/JetBrainsLxgwNerdMono-MediumItalic.ttf') format('truetype');
-        }
-
+        /* Font faces will be dynamically generated */
         body {
             margin: 0;
             padding: 0;
@@ -69,7 +53,7 @@
         }
 
         .content {
-            font-family: 'JetBrainsLxgwNerdMono-Regular', monospace;
+            font-family: monospace;
             font-size: 3vw;
             line-height: 1.8;
             white-space: pre;
@@ -80,16 +64,24 @@
         .separator {
             color: #666;
         }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            color: #888;
+        }
+
+        .error {
+            color: #f44;
+        }
     </style>
 </head>
 <body>
     <div class="controls">
         <label for="weight-select">字重 / Weight:</label>
         <select id="weight-select">
-            <option value="Regular" selected>Regular</option>
-            <option value="Medium">Medium</option>
-            <option value="Italic">Italic</option>
-            <option value="MediumItalic">Medium Italic</option>
+            <option value="">Loading...</option>
         </select>
     </div>
 
@@ -98,17 +90,120 @@
 |ab|cd|ef|gh|ij|kl|mn|op|qr|st|uv|wx|yz|
 |这|应|该|是|中|英|文|完|美|的|2:|1等距|
 |A0|1!|2@|3#|4$|5%|6^|7&|8*|9(|0)|=+|[]|
-|󰈹|󰊕||󰀘|󰊤|󰍉|󰏔|󰖟|󰚩|󰌠|󰃻|󰜴|󰒍|</div>
+|󰈹|󰊕||󰀘|󰊤|󰍉|󰏔|󰖟|󰚩|󰌠|󰃻|󰜴|󰒍|</div>
     </div>
 
     <script>
+        const MANIFEST_PATH = 'output/fonts/fonts-manifest.json';
+        const FONTS_DIR = 'output/fonts/';
+
         const weightSelect = document.getElementById('weight-select');
         const displayText = document.getElementById('display-text');
 
+        // Store loaded font info
+        let loadedFonts = [];
+
+        // Dynamically inject @font-face rules
+        function injectFontFaces(fonts, familyName) {
+            const style = document.createElement('style');
+            let css = '';
+
+            fonts.forEach(font => {
+                const fontFamilyName = `${familyName}-${font.style}`;
+                css += `
+                    @font-face {
+                        font-family: '${fontFamilyName}';
+                        src: url('${FONTS_DIR}${font.filename}') format('truetype');
+                    }
+                `;
+            });
+
+            style.textContent = css;
+            document.head.appendChild(style);
+        }
+
+        // Populate select dropdown
+        function populateSelect(fonts) {
+            weightSelect.innerHTML = '';
+
+            fonts.forEach((font, index) => {
+                const option = document.createElement('option');
+                option.value = font.style;
+                option.textContent = font.display_name;
+                if (index === 0) option.selected = true;
+                weightSelect.appendChild(option);
+            });
+
+            // Apply first font
+            if (fonts.length > 0) {
+                applyFont(fonts[0].style);
+            }
+        }
+
+        // Apply selected font
+        function applyFont(style) {
+            const manifest = loadedFonts;
+            if (manifest && manifest.family_name) {
+                displayText.style.fontFamily = `'${manifest.family_name}-${style}', monospace`;
+            }
+        }
+
+        // Load manifest and initialize
+        async function init() {
+            try {
+                const response = await fetch(MANIFEST_PATH);
+                if (!response.ok) {
+                    throw new Error(`Failed to load manifest: ${response.status}`);
+                }
+
+                const manifest = await response.json();
+                loadedFonts = manifest;
+
+                // Inject font faces
+                injectFontFaces(manifest.fonts, manifest.family_name);
+
+                // Populate dropdown
+                populateSelect(manifest.fonts);
+
+                // Update page title
+                document.title = `${manifest.family_name} 2:1 Ratio Verification`;
+
+            } catch (error) {
+                console.error('Error loading fonts:', error);
+                weightSelect.innerHTML = '<option value="" class="error">Error loading fonts</option>';
+
+                // Fallback: try to detect fonts from common patterns
+                fallbackMode();
+            }
+        }
+
+        // Fallback mode when manifest is not available
+        function fallbackMode() {
+            const defaultFonts = [
+                { style: 'Regular', display_name: 'Regular' },
+                { style: 'Medium', display_name: 'Medium' },
+                { style: 'Italic', display_name: 'Italic' },
+                { style: 'MediumItalic', display_name: 'Medium Italic' }
+            ];
+
+            const familyName = 'JetBrainsLxgwNerdMono';
+            loadedFonts = { family_name: familyName, fonts: defaultFonts };
+
+            injectFontFaces(defaultFonts.map(f => ({
+                ...f,
+                filename: `${familyName}-${f.style}.ttf`
+            })), familyName);
+
+            populateSelect(defaultFonts);
+        }
+
+        // Event listener for weight change
         weightSelect.addEventListener('change', function() {
-            const weight = this.value;
-            displayText.style.fontFamily = `'JetBrainsLxgwNerdMono-${weight}', monospace`;
+            applyFont(this.value);
         });
+
+        // Initialize on page load
+        init();
     </script>
 </body>
 </html>

@@ -10,7 +10,9 @@ JetBrains Mono NerdFont + LXGW WenKai Mono = 2:1 CJK Monospace Font
 - CJK characters from LXGW WenKai Mono (GB Screen version)
 - NerdFont icons preserved
 - Perfect 2:1 width ratio (CJK 1200, English 600 FUnit)
-- Styles: Regular, Medium, Italic, MediumItalic
+- Styles: Regular, Medium, Italic, MediumItalic, Bold, BoldItalic
+- YAML configuration support with CLI override
+- Multi-weight Chinese font mapping (optional)
 
 ## Quick Start
 
@@ -59,6 +61,8 @@ Download from [Nerd Fonts release](https://github.com/ryanoasis/nerd-fonts/relea
 - `JetBrainsMonoNLNerdFontMono-Medium.ttf`
 - `JetBrainsMonoNLNerdFontMono-Italic.ttf`
 - `JetBrainsMonoNLNerdFontMono-MediumItalic.ttf`
+- `JetBrainsMonoNLNerdFontMono-Bold.ttf`
+- `JetBrainsMonoNLNerdFontMono-BoldItalic.ttf`
 
 ### LXGW WenKai Mono GB Screen (v1.521)
 
@@ -117,6 +121,8 @@ uv run python -m http.server 8000
 # Then visit http://localhost:8000/verify-2-1.html
 ```
 
+The verification page supports switching between different font weights using the dropdown menu.
+
 For split web fonts, please visit `http://localhost:8000/verify-2-1-split.html`.
 
 Or simply open `verify-2-1.html` directly in your browser after building the fonts.
@@ -130,16 +136,74 @@ The vertical bars (`|`) should align perfectly across all lines, demonstrating t
 ### Build Script (build.py)
 
 ```
-usage: build.py [-h] [--styles STYLES] [--fonts-dir FONTS_DIR]
+usage: build.py [-h] [--config CONFIG] [--styles STYLES] [--fonts-dir FONTS_DIR]
                 [--output-dir OUTPUT_DIR] [--parallel PARALLEL]
-                [--cn-font CN_FONT]
+                [--cn-font CN_FONT] [--en-font-prefix EN_FONT_PREFIX]
 
 options:
-  --styles STYLES         Comma-separated styles (default: all)
+  --config CONFIG         Path to config.yaml (default: config.yaml)
+  --styles STYLES         Comma-separated styles (default: from config)
   --fonts-dir FONTS_DIR   Source fonts directory (default: fonts/)
   --output-dir OUTPUT_DIR Output directory (default: output/fonts/)
   --parallel PARALLEL     Parallel workers (default: 1)
   --cn-font CN_FONT       Chinese font filename
+  --en-font-prefix EN_FONT_PREFIX  English font filename prefix
+```
+
+Configuration priority: CLI args > config.yaml > defaults
+
+## Configuration
+
+The `config.yaml` file provides centralized configuration for the build process:
+
+```yaml
+# Font metadata
+font:
+  family_name: "JetBrainsLxgwNerdMono"
+  version: "1.0"
+
+# Source fonts
+source:
+  en_font_prefix: "JetBrainsMonoNLNerdFontMono"  # English font filename prefix
+  cn_font: "LXGWWenKaiMonoGBScreen.ttf"          # Chinese font filename
+  fonts_dir: "fonts"
+
+# Weight mapping: style -> display_name
+weight_mapping:
+  Regular: "Regular"
+  Italic: "Italic"
+  Medium: "Medium"
+  MediumItalic: "Medium Italic"
+  Bold: "Bold"
+  BoldItalic: "Bold Italic"
+
+# Build options
+build:
+  styles: "Regular,Medium,Italic,MediumItalic,Bold,BoldItalic"
+  output_dir: "output/fonts"
+  parallel: 1
+
+# Glyph width configuration (2:1 ratio)
+width:
+  en_width: 600
+  cn_width: 1200
+```
+
+### Multi-Weight Chinese Font Support
+
+For Chinese fonts with multiple weights, configure `cn_font_prefix` and `cn_weight_mapping`:
+
+```yaml
+source:
+  cn_font_prefix: "LXGWWenKaiMonoGBScreen"  # Files: {prefix}-{weight}.ttf
+
+cn_weight_mapping:
+  Regular: "Regular"      # -> LXGWWenKaiMonoGBScreen-Regular.ttf
+  Italic: "Regular"
+  Medium: "Medium"        # -> LXGWWenKaiMonoGBScreen-Medium.ttf
+  MediumItalic: "Medium"
+  Bold: "Medium"          # Fallback to Medium if Bold not available
+  BoldItalic: "Medium"
 ```
 
 ### Split Script (split.py)
@@ -159,6 +223,7 @@ options:
 ├── fonts/                  # Source fonts
 ├── output/                 # Output directory
 │   ├── fonts/              # Generated TTF fonts
+│   │   └── fonts-manifest.json  # Font metadata for verification pages
 │   └── split/              # Generated Web fonts (WOFF2)
 ├── src/
 │   ├── __init__.py
@@ -167,6 +232,7 @@ options:
 │   └── utils.py            # Utility functions
 ├── build.py                # Main build script
 ├── split.py                # Font splitting script
+├── config.yaml             # Build configuration
 ├── pyproject.toml          # Python project config
 ├── Dockerfile              # Docker build
 └── README.md
