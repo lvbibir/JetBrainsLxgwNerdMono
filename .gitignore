@@ -35,3 +35,4 @@ Thumbs.db
 
 # uv lock file (optional, uncomment if you want to track it)
 # uv.lock
+.ace-tool/

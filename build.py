@@ -123,8 +123,8 @@ Examples:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output"),
-        help="Output directory (default: output/)",
+        default=Path("output/fonts"),
+        help="Output directory (default: output/fonts/)",
     )
     parser.add_argument(
         "--parallel",

@@ -23,8 +23,9 @@ uv sync
 # Build all styles
 uv run python build.py
 
-# Build specific styles
-uv run python build.py --styles Regular,Medium
+# Font Splitting (Web Fonts)
+# Default input: output/fonts, output: output/split
+uv run python split.py
 ```
 
 ### Using Docker
@@ -67,12 +68,35 @@ Download directly: [LXGWWenKaiMonoGBScreen.ttf](https://github.com/lxgw/LxgwWenK
 
 ## Output
 
-Built fonts are saved to `output/`:
+- Generated fonts are saved to `output/fonts/`.
+- Split web fonts are saved to `output/split/`.
 
-- `JetBrainsLxgwNerdMono-Regular.ttf`
-- `JetBrainsLxgwNerdMono-Medium.ttf`
-- `JetBrainsLxgwNerdMono-Italic.ttf`
-- `JetBrainsLxgwNerdMono-MediumItalic.ttf`
+## Font Splitting (Web Fonts)
+
+The project includes a `split.py` script that uses [cn-font-split](https://github.com/KonghaYao/cn-font-split) to split fonts into woff2 subsets for web delivery:
+
+```bash
+# Install cn-font-split (requires Node.js)
+npm install -g cn-font-split
+
+# Run split script (processes all fonts in output/fonts)
+uv run python split.py
+
+# Custom directories
+uv run python split.py --input-dir my_fonts --output-dir my_split_fonts
+```
+
+Output structure:
+
+```
+output/split/
+├── all.css                  # Merged CSS importing all fonts
+├── JetBrainsLxgwNerdMono-Regular/
+│   ├── result.css           # Single font CSS
+│   ├── index.html           # Test page
+│   └── *.woff2              # Font subsets
+└── ...
+```
 
 ## 2:1 Ratio Verification
 
@@ -92,18 +116,29 @@ The vertical bars (`|`) should align perfectly across all lines, demonstrating t
 
 ## Command Line Options
 
+### Build Script (build.py)
+
 ```
 usage: build.py [-h] [--styles STYLES] [--fonts-dir FONTS_DIR]
                 [--output-dir OUTPUT_DIR] [--parallel PARALLEL]
                 [--cn-font CN_FONT]
 
 options:
-  --styles STYLES       Comma-separated styles (default: all)
-  --fonts-dir FONTS_DIR Source fonts directory (default: fonts/)
-  --output-dir OUTPUT_DIR
-                        Output directory (default: output/)
-  --parallel PARALLEL   Parallel workers (default: 1)
-  --cn-font CN_FONT     Chinese font filename
+  --styles STYLES         Comma-separated styles (default: all)
+  --fonts-dir FONTS_DIR   Source fonts directory (default: fonts/)
+  --output-dir OUTPUT_DIR Output directory (default: output/fonts/)
+  --parallel PARALLEL     Parallel workers (default: 1)
+  --cn-font CN_FONT       Chinese font filename
+```
+
+### Split Script (split.py)
+
+```
+usage: split.py [-h] [--input-dir INPUT_DIR] [--output-dir OUTPUT_DIR]
+
+options:
+  --input-dir INPUT_DIR   Input directory containing font files (default: output/fonts)
+  --output-dir OUTPUT_DIR Output directory for split fonts (default: output/split)
 ```
 
 ## Project Structure
@@ -111,13 +146,16 @@ options:
 ```
 .
 ├── fonts/                  # Source fonts
-├── output/                 # Built fonts
+├── output/                 # Output directory
+│   ├── fonts/              # Generated TTF fonts
+│   └── split/              # Generated Web fonts (WOFF2)
 ├── src/
 │   ├── __init__.py
 │   ├── config.py           # Font configuration
 │   ├── merge.py            # Core merge logic
 │   └── utils.py            # Utility functions
 ├── build.py                # Main build script
+├── split.py                # Font splitting script
 ├── pyproject.toml          # Python project config
 ├── Dockerfile              # Docker build
 └── README.md
@@ -125,7 +163,11 @@ options:
 
 ## Acknowledgments
 
-This project was inspired by and references the implementation approach from [maple-font](https://github.com/subframe7536/maple-font).
+- [maple-font](https://github.com/subframe7536/maple-font): Implementation reference and inspiration
+- [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts): Developer icons
+- [LXGW WenKai](https://github.com/lxgw/LxgwWenKai): Source CJK font
+- [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono): Source English font
+- [cn-font-split](https://github.com/KonghaYao/cn-font-split): Web font splitting tool
 
 ## License
 
