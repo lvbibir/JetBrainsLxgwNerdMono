@@ -76,7 +76,15 @@ docker run --rm \
 
 ## 2:1 比例验证
 
-构建字体后,在浏览器中打开 `verify-2-1.html` 即可验证中英文字符的完美 2:1 宽度比例。
+验证中英文字符的完美 2:1 宽度比例:
+
+```bash
+# 启动本地 HTTP 服务器打开验证页面
+uv run python -m http.server 8000
+# 然后访问 http://localhost:8000/verify-2-1.html
+```
+
+或者构建字体后直接在浏览器中打开 `verify-2-1.html`。
 
 ![2:1 比例验证](resources/2-1.png)
 

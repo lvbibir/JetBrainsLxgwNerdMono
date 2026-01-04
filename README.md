@@ -76,7 +76,15 @@ Built fonts are saved to `output/`:
 
 ## 2:1 Ratio Verification
 
-To verify the perfect 2:1 width ratio between CJK and English characters, open `verify-2-1.html` in your browser after building the fonts.
+To verify the perfect 2:1 width ratio between CJK and English characters:
+
+```bash
+# Open verification page in browser
+uv run python -m http.server 8000
+# Then visit http://localhost:8000/verify-2-1.html
+```
+
+Or simply open `verify-2-1.html` directly in your browser after building the fonts.
 
 ![2:1 Ratio Verification](resources/2-1.png)
 
