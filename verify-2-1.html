@@ -6,8 +6,20 @@
     <title>JetBrainsLxgwNerdMono 2:1 Ratio Verification</title>
     <style>
         @font-face {
-            font-family: 'JetBrainsLxgwNerdMono';
+            font-family: 'JetBrainsLxgwNerdMono-Regular';
             src: url('output/JetBrainsLxgwNerdMono-Regular.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'JetBrainsLxgwNerdMono-Medium';
+            src: url('output/JetBrainsLxgwNerdMono-Medium.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'JetBrainsLxgwNerdMono-Italic';
+            src: url('output/JetBrainsLxgwNerdMono-Italic.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'JetBrainsLxgwNerdMono-MediumItalic';
+            src: url('output/JetBrainsLxgwNerdMono-MediumItalic.ttf') format('truetype');
         }
 
         body {
@@ -15,6 +27,37 @@
             padding: 0;
             background-color: #1e1e1e;
             color: #d4d4d4;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2d2d2d;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        .controls label {
+            margin-right: 20px;
+            font-size: 14px;
+        }
+
+        .controls select {
+            background-color: #3c3c3c;
+            color: #d4d4d4;
+            border: 1px solid #555;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .controls select:hover {
+            background-color: #4c4c4c;
         }
 
         .container {
@@ -26,11 +69,12 @@
         }
 
         .content {
-            font-family: 'JetBrainsLxgwNerdMono', monospace;
+            font-family: 'JetBrainsLxgwNerdMono-Regular', monospace;
             font-size: 3vw;
             line-height: 1.8;
             white-space: pre;
             letter-spacing: 0;
+            transition: font-family 0.3s ease;
         }
 
         .separator {
@@ -39,11 +83,33 @@
     </style>
 </head>
 <body>
+    <div class="controls">
+        <label for="weight-select">字重 / Weight:</label>
+        <select id="weight-select">
+            <option value="Regular" selected>Regular</option>
+            <option value="Medium">Medium</option>
+            <option value="Italic">Italic</option>
+            <option value="MediumItalic">Medium Italic</option>
+        </select>
+    </div>
+
     <div class="container">
-        <div class="content">----------------中英文2:1---------------
+        <div class="content" id="display-text">----------------中英文2:1---------------
+连续中文测试
 |ab|cd|ef|gh|ij|kl|mn|op|qr|st|uv|wx|yz|
 |这|应|该|是|中|英|文|完|美|的|2:|1等距|
-|A0|1!|2@|3#|4$|5%|6^|7&|8*|9(|0)|=+|[]|</div>
+|A0|1!|2@|3#|4$|5%|6^|7&|8*|9(|0)|=+|[]|
+|󰈹|󰊕||󰀘|󰊤|󰍉|󰏔|󰖟|󰚩|󰌠|󰃻|󰜴|󰒍|</div>
     </div>
+
+    <script>
+        const weightSelect = document.getElementById('weight-select');
+        const displayText = document.getElementById('display-text');
+
+        weightSelect.addEventListener('change', function() {
+            const weight = this.value;
+            displayText.style.fontFamily = `'JetBrainsLxgwNerdMono-${weight}', monospace`;
+        });
+    </script>
 </body>
 </html>

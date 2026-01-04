@@ -23,7 +23,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.config import FontConfig
-from src.merge import merge_fonts, center_cjk_glyphs
+from src.merge import merge_fonts, center_cjk_glyphs, scale_nerd_icons
 from src.utils import update_font_names, verify_glyph_width
 
 
@@ -54,6 +54,10 @@ def build_single_font(
         cn_font_path=str(cn_font_path),
         config=config,
     )
+
+    # Scale NerdFont icons to CJK width
+    print("  Scaling NerdFont icons...")
+    scale_nerd_icons(merged_font, config)
 
     # Center CJK glyphs
     print("  Centering CJK glyphs...")

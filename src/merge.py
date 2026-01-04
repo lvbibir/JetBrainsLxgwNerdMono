@@ -181,6 +181,88 @@ def merge_fonts(
     return base_font
 
 
+def scale_nerd_icons(font: TTFont, config: FontConfig) -> None:
+    """Scale NerdFont icons to occupy 2x English character width (same as CJK).
+
+    NerdFont icons are in Private Use Area:
+    - U+E000-U+F8FF (BMP Private Use Area)
+    - U+F0000-U+FFFFD (Supplementary Private Use Area-A)
+
+    Args:
+        font: TTFont object
+        config: FontConfig object
+    """
+    glyf = font["glyf"]
+    hmtx = font["hmtx"]
+    cmap = font["cmap"].getBestCmap()
+
+    # NerdFont icon Unicode ranges
+    nerd_ranges = [
+        (0xE000, 0xF8FF),      # Private Use Area
+        (0xF0000, 0xFFFFD),    # Supplementary Private Use Area-A
+    ]
+
+    nerd_glyphs = []
+    for codepoint, glyph_name in cmap.items():
+        for start, end in nerd_ranges:
+            if start <= codepoint <= end:
+                nerd_glyphs.append(glyph_name)
+                break
+
+    if not nerd_glyphs:
+        return
+
+    print(f"  Scaling {len(nerd_glyphs)} NerdFont icons to match CJK width...")
+
+    # Target: scale icons to ~70% of 1200 = 840 units (similar to CJK fill ratio)
+    # Original icon width is ~600, so scale factor = 840 / 600 = 1.4
+    scale_factor = 1.4
+
+    for glyph_name in nerd_glyphs:
+        if glyph_name not in glyf.glyphs:
+            continue
+
+        glyph = glyf[glyph_name]
+        if glyph.numberOfContours <= 0:
+            continue
+
+        # Get current metrics
+        width, lsb = hmtx[glyph_name]
+        if width != config.en_width:
+            continue  # Skip if not standard English width
+
+        # Scale glyph
+        if hasattr(glyph, "coordinates"):
+            # Ensure bounds are calculated
+            if not hasattr(glyph, 'xMin') or glyph.xMin is None:
+                glyph.recalcBounds(glyf)
+
+            # Scale to 2x size
+            glyph.coordinates.scale((scale_factor, scale_factor))
+            glyph.recalcBounds(glyf)
+
+        # Update advance width to CJK width (1200)
+        # Center the glyph horizontally and vertically
+        if hasattr(glyph, 'xMin') and glyph.xMin is not None:
+            glyph_width = glyph.xMax - glyph.xMin
+            ideal_lsb = (config.cn_width - glyph_width) // 2
+            delta_x = ideal_lsb - glyph.xMin
+
+            # Vertical centering: align icon center with CJK center (~360)
+            # Current icon center is around 504, need to move down by ~140
+            glyph_center_y = (glyph.yMin + glyph.yMax) / 2
+            target_center_y = 360  # Similar to CJK vertical center
+            delta_y = target_center_y - glyph_center_y
+
+            if abs(delta_x) > 1 or abs(delta_y) > 1:
+                glyph.coordinates.translate((delta_x, delta_y))
+                glyph.recalcBounds(glyf)
+
+            hmtx[glyph_name] = (config.cn_width, ideal_lsb)
+        else:
+            hmtx[glyph_name] = (config.cn_width, 0)
+
+
 def center_cjk_glyphs(font: TTFont, config: FontConfig) -> None:
     """Center CJK glyphs within their advance width.
 
