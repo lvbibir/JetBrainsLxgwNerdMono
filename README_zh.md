@@ -93,10 +93,19 @@ output/split/
 ├── all.css                  # 合并所有字体的 CSS 引用
 ├── JetBrainsLxgwNerdMono-Regular/
 │   ├── result.css           # 单个字体的 CSS
-│   ├── index.html           # 测试页面
+│   ├── index.html           # 测试页面 (包含分包验证报告)
 │   └── *.woff2              # 字体子集
 └── ...
 ```
+
+分包完成后，您可以直接打开 `output/split/<FontName>/index.html` 查看该字体的分包验证报告和预览效果。
+
+> **注意**: 由于浏览器跨域安全策略 (CORS)，直接双击打开 `index.html` 可能无法正常加载字体文件或 JSON 报告。请使用本地 HTTP 服务器查看:
+>
+> ```bash
+> uv run python -m http.server 8000
+> # 访问 http://localhost:8000/output/split/<FontName>/index.html
+> ```
 
 ## 2:1 比例验证
 
@@ -107,6 +116,8 @@ output/split/
 uv run python -m http.server 8000
 # 然后访问 http://localhost:8000/verify-2-1.html
 ```
+
+对于分包后的 Web 字体，请访问 `http://localhost:8000/verify-2-1-split.html` 进行验证。
 
 或者构建字体后直接在浏览器中打开 `verify-2-1.html`。
 

@@ -93,10 +93,19 @@ output/split/
 ├── all.css                  # Merged CSS importing all fonts
 ├── JetBrainsLxgwNerdMono-Regular/
 │   ├── result.css           # Single font CSS
-│   ├── index.html           # Test page
+│   ├── index.html           # Test page (contains splitting report)
 │   └── *.woff2              # Font subsets
 └── ...
 ```
+
+After splitting, you can open `output/split/<FontName>/index.html` to view the splitting report and preview the font.
+
+> **Note**: Due to browser CORS policies, directly opening `index.html` may fail to load font files or JSON reports. Please use a local HTTP server:
+>
+> ```bash
+> uv run python -m http.server 8000
+> # Visit http://localhost:8000/output/split/<FontName>/index.html
+> ```
 
 ## 2:1 Ratio Verification
 
@@ -107,6 +116,8 @@ To verify the perfect 2:1 width ratio between CJK and English characters:
 uv run python -m http.server 8000
 # Then visit http://localhost:8000/verify-2-1.html
 ```
+
+For split web fonts, please visit `http://localhost:8000/verify-2-1-split.html`.
 
 Or simply open `verify-2-1.html` directly in your browser after building the fonts.
 

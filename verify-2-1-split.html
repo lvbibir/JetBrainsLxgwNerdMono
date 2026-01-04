@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JetBrainsLxgwNerdMono (Split) 2:1 Ratio Verification</title>
+    <!-- 引入分包后的 CSS -->
+    <link rel="stylesheet" href="output/split/all.css">
+    <style>
+        /* CSS 变量定义不同的字体族名称，与 cn-font-split 生成的名称对应 */
+        /* 根据 cn-font-split 配置，fontFamily 可能是统一的，通过 weight/style 区分 */
+        /* 或者 split.py 可能会为不同变体生成不同的 css 文件，我们需要确认 split.py 的行为 */
+        /* 查看 split.py 源码发现：--css.fontFamily config.family_name (即 JetBrainsLxgwNerdMono) */
+        /* 但是不同变体通过 fontWeight 和 fontStyle 区分 */
+
+        /* Regular: weight 400, style normal */
+        /* Medium: weight 500, style normal */
+        /* Italic: weight 400, style italic */
+        /* MediumItalic: weight 500, style italic */
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2d2d2d;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        .controls label {
+            margin-right: 20px;
+            font-size: 14px;
+        }
+
+        .controls select {
+            background-color: #3c3c3c;
+            color: #d4d4d4;
+            border: 1px solid #555;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .controls select:hover {
+            background-color: #4c4c4c;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding-top: 15vh;
+        }
+
+        .content {
+            font-family: 'JetBrainsLxgwNerdMono', monospace;
+            font-size: 3vw;
+            line-height: 1.8;
+            white-space: pre;
+            letter-spacing: 0;
+            transition: all 0.3s ease;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        .separator {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <label for="weight-select">字重 / Weight:</label>
+        <select id="weight-select">
+            <option value="Regular" selected>Regular</option>
+            <option value="Medium">Medium</option>
+            <option value="Italic">Italic</option>
+            <option value="MediumItalic">Medium Italic</option>
+        </select>
+    </div>
+
+    <div class="container">
+        <div class="content" id="display-text">----------------中英文2:1---------------
+|ab|cd|ef|gh|ij|kl|mn|op|qr|st|uv|wx|yz|
+|这|应|该|是|中|英|文|完|美|的|2:|1等距|
+|A0|1!|2@|3#|4$|5%|6^|7&|8*|9(|0)|=+|[]|
+|󰈹|󰊕||󰀘|󰊤|󰍉|󰏔|󰖟|󰚩|󰌠|󰃻|󰜴|󰒍|</div>
+    </div>
+
+    <script>
+        const weightSelect = document.getElementById('weight-select');
+        const displayText = document.getElementById('display-text');
+
+        weightSelect.addEventListener('change', function() {
+            const weight = this.value;
+
+            // 根据选择调整 font-weight 和 font-style
+            if (weight === 'Regular') {
+                displayText.style.fontWeight = '400';
+                displayText.style.fontStyle = 'normal';
+            } else if (weight === 'Medium') {
+                displayText.style.fontWeight = '500';
+                displayText.style.fontStyle = 'normal';
+            } else if (weight === 'Italic') {
+                displayText.style.fontWeight = '400';
+                displayText.style.fontStyle = 'italic';
+            } else if (weight === 'MediumItalic') {
+                displayText.style.fontWeight = '500';
+                displayText.style.fontStyle = 'italic';
+            }
+        });
+    </script>
+</body>
+</html>
