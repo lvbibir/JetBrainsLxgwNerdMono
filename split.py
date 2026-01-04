@@ -47,10 +47,13 @@ def split_font(
 
     # Determine font weight and style for CSS
     style_key = None
-    for key, (filename, _) in config.weight_mapping.items():
-        if key in font_name: # Simple matching, might need refinement
-             style_key = key
-             break
+    # Sort keys by length descending to ensure "MediumItalic" is matched before "Medium"
+    sorted_keys = sorted(config.weight_mapping.keys(), key=len, reverse=True)
+
+    for key in sorted_keys:
+        if key in font_name:
+            style_key = key
+            break
 
     # Default values
     font_weight = "400"
