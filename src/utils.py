@@ -1,11 +1,17 @@
 """Utility functions for font manipulation."""
 
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from fontTools.ttLib import TTFont
 
 
-def set_font_name(font: TTFont, name: str, name_id: int, mac: bool = True) -> None:
+def set_font_name(
+    font: TTFont,
+    name: str,
+    name_id: int,
+    mac: bool = True,
+    lang_id: int = 0x409
+) -> None:
     """Set font name entry.
 
     Args:
@@ -13,19 +19,23 @@ def set_font_name(font: TTFont, name: str, name_id: int, mac: bool = True) -> No
         name: Name string to set
         name_id: Name table ID
         mac: Whether to also set Mac platform entry (default True for macOS compatibility)
+        lang_id: Language ID (default 0x409 for US English)
     """
     name_table = font["name"]
 
-    # Remove all existing entries for this nameID to avoid conflicts
-    name_table.removeNames(nameID=name_id)
+    # Only remove existing entries if we are setting English (default)
+    # This allows adding multiple languages for the same NameID
+    if lang_id == 0x409:
+        name_table.removeNames(nameID=name_id)
 
     # Windows platform (platformID=3, platEncID=1 = Unicode BMP)
     name_table.setName(
-        name, nameID=name_id, platformID=3, platEncID=1, langID=0x409
+        name, nameID=name_id, platformID=3, platEncID=1, langID=lang_id
     )
+
     # Mac platform (platformID=1, platEncID=0 = Roman, langID=0 = English)
-    # Required for macOS Font Book validation
-    if mac:
+    # Only set for English
+    if mac and lang_id == 0x409:
         name_table.setName(
             name, nameID=name_id, platformID=1, platEncID=0, langID=0x0
         )
@@ -63,6 +73,7 @@ def update_font_names(
     """
     unique_id = f"{version_str};JBLXGW;{postscript_name}"
 
+    # English names (Language ID 0x409)
     # NameID 0: Copyright
     if copyright_str:
         set_font_name(font, copyright_str, 0)
@@ -103,9 +114,51 @@ def update_font_names(
         set_font_name(font, license_url, 14)
 
     # Set Preferred family/style (NameID 16, 17) for better Windows compatibility
-    # For non-standard styles (Medium, MediumItalic), these ensure proper display
     set_font_name(font, family_name, 16)  # Preferred Family
     set_font_name(font, style_name, 17)  # Preferred Subfamily
+
+    # Add Chinese names (Language ID 0x804) for better Windows CJK compatibility
+    # Using the same names as English for now, but registering them under zh-CN
+    # This helps Excel recognize the font as supporting Chinese regions
+    cn_lang_id = 0x804
+    set_font_name(font, family_name, 1, mac=False, lang_id=cn_lang_id)
+    set_font_name(font, style_name, 2, mac=False, lang_id=cn_lang_id)
+    set_font_name(font, full_name, 4, mac=False, lang_id=cn_lang_id)
+    set_font_name(font, family_name, 16, mac=False, lang_id=cn_lang_id)
+    set_font_name(font, style_name, 17, mac=False, lang_id=cn_lang_id)
+
+
+def merge_os2_ranges(target_font: TTFont, source_font: TTFont) -> None:
+    """Merge OS/2 table ranges (Unicode ranges and Code Page ranges).
+
+    This is critical for Windows applications (like Excel) to recognize
+    Chinese character support.
+
+    Args:
+        target_font: The font to update
+        source_font: The source font (usually the CJK font)
+    """
+    if "OS/2" not in target_font or "OS/2" not in source_font:
+        return
+
+    target_os2 = target_font["OS/2"]
+    source_os2 = source_font["OS/2"]
+
+    # Merge Unicode Ranges (ulUnicodeRange1-4)
+    # These are bit fields indicating supported Unicode blocks
+    if hasattr(target_os2, "ulUnicodeRange1") and hasattr(source_os2, "ulUnicodeRange1"):
+        target_os2.ulUnicodeRange1 |= source_os2.ulUnicodeRange1
+        target_os2.ulUnicodeRange2 |= source_os2.ulUnicodeRange2
+        target_os2.ulUnicodeRange3 |= source_os2.ulUnicodeRange3
+        target_os2.ulUnicodeRange4 |= source_os2.ulUnicodeRange4
+        print("  Merged OS/2 Unicode Ranges")
+
+    # Merge Code Page Ranges (ulCodePageRange1-2)
+    # These are bit fields indicating supported code pages (e.g. 936 for GBK)
+    if hasattr(target_os2, "ulCodePageRange1") and hasattr(source_os2, "ulCodePageRange1"):
+        target_os2.ulCodePageRange1 |= source_os2.ulCodePageRange1
+        target_os2.ulCodePageRange2 |= source_os2.ulCodePageRange2
+        print("  Merged OS/2 Code Page Ranges")
 
 
 def is_cjk_codepoint(

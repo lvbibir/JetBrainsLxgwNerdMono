@@ -5,7 +5,7 @@ from typing import Set
 from fontTools.ttLib import TTFont
 
 from .config import FontConfig
-from .utils import is_cjk_codepoint
+from .utils import is_cjk_codepoint, merge_os2_ranges
 
 
 def get_cjk_glyphs(font: TTFont, config: FontConfig) -> Set[str]:
@@ -176,6 +176,9 @@ def merge_fonts(
             base_font["hhea"].advanceWidthMax, config.cn_width
         )
         base_font["hhea"].numberOfHMetrics = len(base_hmtx.metrics)
+
+    # Merge OS/2 ranges from CN font to base font
+    merge_os2_ranges(base_font, cn_font)
 
     cn_font.close()
     return base_font
