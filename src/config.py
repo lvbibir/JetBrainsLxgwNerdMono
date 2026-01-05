@@ -1,7 +1,7 @@
 """Font configuration for JetBrainsLxgwNerdMono."""
 
-from dataclasses import dataclass, field
-from typing import Dict, Tuple
+from dataclasses import dataclass
+from typing import Tuple
 
 
 @dataclass
@@ -38,18 +38,3 @@ class FontConfig:
         (0x3300, 0x33FF),  # CJK Compatibility
         (0xFE30, 0xFE4F),  # CJK Compatibility Forms
     )
-
-    # Weight mapping: style -> (source_file, display_name)
-    weight_mapping: Dict[str, Tuple[str, str]] = field(default_factory=dict)
-
-    def __post_init__(self):
-        if not self.weight_mapping:
-            self.weight_mapping = {
-                "Regular": ("JetBrainsMonoNLNerdFontMono-Regular.ttf", "Regular"),
-                "Medium": ("JetBrainsMonoNLNerdFontMono-Medium.ttf", "Medium"),
-                "Italic": ("JetBrainsMonoNLNerdFontMono-Italic.ttf", "Italic"),
-                "MediumItalic": (
-                    "JetBrainsMonoNLNerdFontMono-MediumItalic.ttf",
-                    "Medium Italic",
-                ),
-            }

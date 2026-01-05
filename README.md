@@ -7,8 +7,10 @@ JetBrains Mono NerdFont + LXGW WenKai Mono = 2:1 CJK Monospace Font
 ## Features
 
 - English characters from JetBrains Mono NerdFont
-- CJK characters from LXGW WenKai Mono (GB Screen version)
-- NerdFont icons preserved
+- CJK characters from LXGW WenKai Mono GB Screen (Regular/Medium) and LXGW ZhenKai GB (Bold)
+- NerdFont icons preserved and scaled to match CJK width
+  - Powerline symbols (U+E0A0-U+E0DF) maintain original vertical bounds for proper terminal alignment
+  - Regular icons scaled 1.4x and vertically centered
 - Perfect 2:1 width ratio (CJK 1200, English 600 FUnit)
 - Styles: Regular, Medium, Italic, MediumItalic, Bold, BoldItalic
 - YAML configuration support with CLI override
@@ -68,7 +70,13 @@ Download from [Nerd Fonts release](https://github.com/ryanoasis/nerd-fonts/relea
 
 Download directly: [LXGWWenKaiMonoGBScreen.ttf](https://github.com/lxgw/LxgwWenKai-Screen/releases/download/v1.521/LXGWWenKaiMonoGBScreen.ttf)
 
-- `LXGWWenKaiMonoGBScreen.ttf`
+- `LXGWWenKaiMonoGBScreen.ttf` - Used for Regular/Italic/Medium/MediumItalic styles
+
+### LXGW ZhenKai GB (for Bold weights)
+
+Download directly: [LXGWZhenKaiGB-Regular.ttf](https://github.com/lxgw/LxgwZhenKai/releases)
+
+- `LXGWZhenKaiGB-Regular.ttf` - Used for Bold/BoldItalic styles to provide heavier CJK strokes
 
 ## Output
 
@@ -138,7 +146,6 @@ The vertical bars (`|`) should align perfectly across all lines, demonstrating t
 ```
 usage: build.py [-h] [--config CONFIG] [--styles STYLES] [--fonts-dir FONTS_DIR]
                 [--output-dir OUTPUT_DIR] [--parallel PARALLEL]
-                [--cn-font CN_FONT] [--en-font-prefix EN_FONT_PREFIX]
 
 options:
   --config CONFIG         Path to config.yaml (default: config.yaml)
@@ -146,8 +153,6 @@ options:
   --fonts-dir FONTS_DIR   Source fonts directory (default: fonts/)
   --output-dir OUTPUT_DIR Output directory (default: output/fonts/)
   --parallel PARALLEL     Parallel workers (default: 1)
-  --cn-font CN_FONT       Chinese font filename
-  --en-font-prefix EN_FONT_PREFIX  English font filename prefix
 ```
 
 Configuration priority: CLI args > config.yaml > defaults
@@ -160,28 +165,53 @@ The `config.yaml` file provides centralized configuration for the build process:
 # Font metadata
 font:
   family_name: "JetBrainsLxgwNerdMono"
-  version: "1.0"
+  version: "1.1"
+  author: "lvbibir"
+  copyright: "Copyright (c) 2024 lvbibir"
+  description: "JetBrains Mono NerdFont + LXGW WenKai Mono merged font with 2:1 CJK ratio."
+  url: "https://github.com/lvbibir/JetBrainsLxgwNerdMono"
+  license: "This font is licensed under the SIL Open Font License, Version 1.1."
+  license_url: "https://openfontlicense.org"
 
-# Source fonts
-source:
-  en_font_prefix: "JetBrainsMonoNLNerdFontMono"  # English font filename prefix
-  cn_font: "LXGWWenKaiMonoGBScreen.ttf"          # Chinese font filename
-  fonts_dir: "fonts"
+# Source fonts directory
+fonts_dir: "fonts"
 
-# Weight mapping: style -> display_name
-weight_mapping:
-  Regular: "Regular"
-  Italic: "Italic"
-  Medium: "Medium"
-  MediumItalic: "Medium Italic"
-  Bold: "Bold"
-  BoldItalic: "Bold Italic"
+# Styles configuration
+# Each style specifies:
+#   en_font: English font filename (in fonts_dir)
+#   cn_font: Chinese font filename (in fonts_dir)
+#   display_name: Style name shown in font metadata
+styles:
+  Regular:
+    en_font: "JetBrainsMonoNLNerdFontMono-Regular.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+    display_name: "Regular"
+  Italic:
+    en_font: "JetBrainsMonoNLNerdFontMono-Italic.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+    display_name: "Italic"
+  Medium:
+    en_font: "JetBrainsMonoNLNerdFontMono-Medium.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+    display_name: "Medium"
+  MediumItalic:
+    en_font: "JetBrainsMonoNLNerdFontMono-MediumItalic.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+    display_name: "Medium Italic"
+  Bold:
+    en_font: "JetBrainsMonoNLNerdFontMono-Bold.ttf"
+    cn_font: "LXGWZhenKaiGB-Regular.ttf"  # Use heavier Chinese font for Bold
+    display_name: "Bold"
+  BoldItalic:
+    en_font: "JetBrainsMonoNLNerdFontMono-BoldItalic.ttf"
+    cn_font: "LXGWZhenKaiGB-Regular.ttf"
+    display_name: "Bold Italic"
 
 # Build options
 build:
   styles: "Regular,Medium,Italic,MediumItalic,Bold,BoldItalic"
   output_dir: "output/fonts"
-  parallel: 1
+  parallel: 6
 
 # Glyph width configuration (2:1 ratio)
 width:
@@ -189,21 +219,24 @@ width:
   cn_width: 1200
 ```
 
-### Multi-Weight Chinese Font Support
+### Multi-Weight Chinese Font Example
 
-For Chinese fonts with multiple weights, configure `cn_font_prefix` and `cn_weight_mapping`:
+For Chinese fonts with multiple weights, specify different `cn_font` for each style:
 
 ```yaml
-source:
-  cn_font_prefix: "LXGWWenKaiMonoGBScreen"  # Files: {prefix}-{weight}.ttf
-
-cn_weight_mapping:
-  Regular: "Regular"      # -> LXGWWenKaiMonoGBScreen-Regular.ttf
-  Italic: "Regular"
-  Medium: "Medium"        # -> LXGWWenKaiMonoGBScreen-Medium.ttf
-  MediumItalic: "Medium"
-  Bold: "Medium"          # Fallback to Medium if Bold not available
-  BoldItalic: "Medium"
+styles:
+  Regular:
+    en_font: "JetBrainsMonoNLNerdFontMono-Regular.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen-Regular.ttf"
+    display_name: "Regular"
+  Medium:
+    en_font: "JetBrainsMonoNLNerdFontMono-Medium.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen-Medium.ttf"
+    display_name: "Medium"
+  Bold:
+    en_font: "JetBrainsMonoNLNerdFontMono-Bold.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen-Medium.ttf"  # Fallback to Medium
+    display_name: "Bold"
 ```
 
 ### Split Script (split.py)
@@ -242,7 +275,8 @@ options:
 
 - [maple-font](https://github.com/subframe7536/maple-font): Implementation reference and inspiration
 - [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts): Developer icons
-- [LXGW WenKai](https://github.com/lxgw/LxgwWenKai): Source CJK font
+- [LXGW WenKai](https://github.com/lxgw/LxgwWenKai): Source CJK font for Regular/Medium weights
+- [LXGW ZhenKai](https://github.com/lxgw/LxgwZhenKai): Source CJK font for Bold weights
 - [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono): Source English font
 - [cn-font-split](https://github.com/KonghaYao/cn-font-split): Web font splitting tool
 
@@ -252,4 +286,5 @@ This project is for personal use. Please check the licenses of the source fonts:
 
 - JetBrains Mono: OFL-1.1
 - LXGW WenKai: OFL-1.1
+- LXGW ZhenKai: OFL-1.1
 - Nerd Fonts: MIT

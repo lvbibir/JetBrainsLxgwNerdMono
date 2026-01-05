@@ -21,7 +21,12 @@ STYLE_DISPLAY_NAMES = {
     "Medium": "Medium",
     "Italic": "Italic",
     "MediumItalic": "Medium Italic",
+    "Bold": "Bold",
+    "BoldItalic": "Bold Italic",
 }
+
+# All supported style keys, sorted by length descending for matching
+STYLE_KEYS = ["MediumItalic", "BoldItalic", "Medium", "Italic", "Bold", "Regular"]
 
 
 def check_cn_font_split_installed() -> bool:
@@ -94,10 +99,8 @@ def split_font(
 
     # Determine font weight and style for CSS
     style_key = None
-    # Sort keys by length descending to ensure "MediumItalic" is matched before "Medium"
-    sorted_keys = sorted(config.weight_mapping.keys(), key=len, reverse=True)
-
-    for key in sorted_keys:
+    # Use pre-sorted style keys (longest first) to ensure proper matching
+    for key in STYLE_KEYS:
         if key in font_name:
             style_key = key
             break
@@ -107,7 +110,9 @@ def split_font(
     font_style = "normal"
 
     if style_key:
-        if "Medium" in style_key:
+        if "Bold" in style_key:
+            font_weight = "700"
+        elif "Medium" in style_key:
             font_weight = "500"
         if "Italic" in style_key:
             font_style = "italic"

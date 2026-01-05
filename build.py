@@ -69,41 +69,14 @@ def get_config_value(yaml_config: Dict[str, Any], *keys: str, default: Any = Non
     return value
 
 
-def get_cn_font_path(
-    style: str,
-    fonts_dir: Path,
-    cn_font_prefix: str | None,
-    cn_weight_mapping: Dict[str, str] | None,
-    cn_font_fallback: str,
-) -> Path:
-    """Get Chinese font path for a given style.
-
-    Uses weight mapping if available, otherwise falls back to single file mode.
-
-    Args:
-        style: Font style (e.g., Regular, Medium)
-        fonts_dir: Directory containing source fonts
-        cn_font_prefix: Chinese font filename prefix
-        cn_weight_mapping: Mapping from English style to Chinese weight
-        cn_font_fallback: Fallback Chinese font filename
-
-    Returns:
-        Path to Chinese font file
-    """
-    if cn_weight_mapping and cn_font_prefix:
-        cn_weight = cn_weight_mapping.get(style)
-        if cn_weight:
-            return fonts_dir / f"{cn_font_prefix}-{cn_weight}.ttf"
-    # Fallback to single file mode
-    return fonts_dir / cn_font_fallback
-
-
 def build_single_font(
     style: str,
     en_font_path: Path,
     cn_font_path: Path,
+    display_name: str,
     output_dir: Path,
     config: FontConfig,
+    metadata: dict,
 ) -> str:
     """Build a single font variant.
 
@@ -111,8 +84,10 @@ def build_single_font(
         style: Font style (Regular, Medium, Italic, MediumItalic)
         en_font_path: Path to English font (e.g., JetBrains Mono NerdFont)
         cn_font_path: Path to Chinese font (e.g., LXGW WenKai Mono)
+        display_name: Display name for the style in font metadata
         output_dir: Output directory
         config: FontConfig object
+        metadata: Font metadata dict (author, copyright, description, url, license, license_url)
 
     Returns:
         Output file path
@@ -135,17 +110,22 @@ def build_single_font(
     center_cjk_glyphs(merged_font, config)
 
     # Update font names
-    style_display = config.weight_mapping[style][1]
     postscript_name = f"{config.family_name_compact}-{style}"
 
     print("  Updating font metadata...")
     update_font_names(
         font=merged_font,
         family_name=config.family_name,
-        style_name=style_display,
-        full_name=f"{config.family_name} {style_display}",
+        style_name=display_name,
+        full_name=f"{config.family_name} {display_name}",
         postscript_name=postscript_name,
         version_str=f"Version {config.version}",
+        author=metadata.get("author", ""),
+        copyright_str=metadata.get("copyright", ""),
+        description=metadata.get("description", ""),
+        url=metadata.get("url", ""),
+        license_desc=metadata.get("license", ""),
+        license_url=metadata.get("license_url", ""),
     )
 
     # Verify glyph widths
@@ -180,7 +160,6 @@ Examples:
   uv run python build.py
   uv run python build.py --config config.yaml
   uv run python build.py --styles Regular,Medium
-  uv run python build.py --cn-font LXGWWenKaiMonoGBScreen.ttf
 
 Configuration priority: CLI args > config.yaml > defaults
         """,
@@ -215,34 +194,27 @@ Configuration priority: CLI args > config.yaml > defaults
         default=None,
         help="Number of parallel workers (default: from config or 1)",
     )
-    parser.add_argument(
-        "--cn-font",
-        type=str,
-        default=None,
-        help="Chinese font filename (default: from config)",
-    )
-    parser.add_argument(
-        "--en-font-prefix",
-        type=str,
-        default=None,
-        help="English font filename prefix (default: from config). "
-        "Files should be named as {prefix}-{style}.ttf",
-    )
 
     args = parser.parse_args()
 
     # Load YAML config
     yaml_config = load_config(args.config)
 
+    # Get styles configuration from YAML
+    styles_config = get_config_value(yaml_config, "styles") or {}
+    if not styles_config:
+        print("Error: No styles defined in config.yaml")
+        sys.exit(1)
+
     # Merge config: CLI args > YAML > defaults
     styles_str = (
         args.styles
         or get_config_value(yaml_config, "build", "styles")
-        or "Regular,Medium,Italic,MediumItalic"
+        or ",".join(styles_config.keys())
     )
     fonts_dir = (
         args.fonts_dir
-        or Path(get_config_value(yaml_config, "source", "fonts_dir") or "fonts")
+        or Path(get_config_value(yaml_config, "fonts_dir") or "fonts")
     )
     output_dir = (
         args.output_dir
@@ -253,23 +225,6 @@ Configuration priority: CLI args > config.yaml > defaults
         if args.parallel is not None
         else get_config_value(yaml_config, "build", "parallel", default=1)
     )
-    cn_font = (
-        args.cn_font
-        or get_config_value(yaml_config, "source", "cn_font")
-        or "LXGWWenKaiMonoGBScreen.ttf"
-    )
-    en_font_prefix = (
-        args.en_font_prefix
-        or get_config_value(yaml_config, "source", "en_font_prefix")
-        or "JetBrainsMonoNLNerdFontMono"
-    )
-
-    # Chinese font multi-weight support
-    cn_font_prefix = get_config_value(yaml_config, "source", "cn_font_prefix")
-    cn_weight_mapping = get_config_value(yaml_config, "cn_weight_mapping") or {}
-
-    # Weight mapping from config (style -> display_name)
-    yaml_weight_mapping = get_config_value(yaml_config, "weight_mapping") or {}
 
     # Font metadata from config
     family_name = get_config_value(yaml_config, "font", "family_name") or "JetBrainsLxgwNerdMono"
@@ -277,49 +232,61 @@ Configuration priority: CLI args > config.yaml > defaults
     en_width = get_config_value(yaml_config, "width", "en_width", default=600)
     cn_width = get_config_value(yaml_config, "width", "cn_width", default=1200)
 
-    # Build weight_mapping for FontConfig: style -> (filename, display_name)
-    # Merge yaml config with defaults
-    weight_mapping_for_config: Dict[str, tuple] = {}
-    if yaml_weight_mapping:
-        for style, display_name in yaml_weight_mapping.items():
-            # filename is generated from en_font_prefix, so we use a placeholder
-            weight_mapping_for_config[style] = (f"{en_font_prefix}-{style}.ttf", display_name)
+    # Font metadata for name table
+    metadata = {
+        "author": get_config_value(yaml_config, "font", "author") or "",
+        "copyright": get_config_value(yaml_config, "font", "copyright") or "",
+        "description": get_config_value(yaml_config, "font", "description") or "",
+        "url": get_config_value(yaml_config, "font", "url") or "",
+        "license": get_config_value(yaml_config, "font", "license") or "",
+        "license_url": get_config_value(yaml_config, "font", "license_url") or "",
+    }
 
-    # Initialize config with values from YAML
+    # Initialize FontConfig
     config = FontConfig(
         family_name=family_name,
         family_name_compact=family_name,
         version=version,
         en_width=en_width,
         cn_width=cn_width,
-        weight_mapping=weight_mapping_for_config if weight_mapping_for_config else {},
     )
 
-    # Parse styles
+    # Parse styles to build
     styles = [s.strip() for s in styles_str.split(",")]
-    valid_styles = list(config.weight_mapping.keys())
+    valid_styles = list(styles_config.keys())
 
     for style in styles:
         if style not in valid_styles:
             print(f"Error: Invalid style '{style}'. Valid styles: {valid_styles}")
             sys.exit(1)
 
-    # Check source fonts exist
-    # Collect CN font paths for each style (supports multi-weight mapping)
-    cn_font_paths: Dict[str, Path] = {}
+    # Build font paths and validate
+    font_paths: Dict[str, Dict[str, Any]] = {}
     for style in styles:
-        cn_path = get_cn_font_path(style, fonts_dir, cn_font_prefix, cn_weight_mapping, cn_font)
-        cn_font_paths[style] = cn_path
-        if not cn_path.exists():
-            print(f"Error: CN font not found: {cn_path}")
+        style_cfg = styles_config[style]
+        en_font = style_cfg.get("en_font")
+        cn_font = style_cfg.get("cn_font")
+        display_name = style_cfg.get("display_name", style)
+
+        if not en_font or not cn_font:
+            print(f"Error: Style '{style}' must have both 'en_font' and 'cn_font' defined")
             sys.exit(1)
 
-    for style in styles:
-        en_font_file = f"{en_font_prefix}-{style}.ttf"
-        en_font_path = fonts_dir / en_font_file
+        en_font_path = fonts_dir / en_font
+        cn_font_path = fonts_dir / cn_font
+
         if not en_font_path.exists():
             print(f"Error: English font not found: {en_font_path}")
             sys.exit(1)
+        if not cn_font_path.exists():
+            print(f"Error: Chinese font not found: {cn_font_path}")
+            sys.exit(1)
+
+        font_paths[style] = {
+            "en_font_path": en_font_path,
+            "cn_font_path": cn_font_path,
+            "display_name": display_name,
+        }
 
     # Create output directory
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -329,32 +296,42 @@ Configuration priority: CLI args > config.yaml > defaults
     print(f"Source: {fonts_dir}")
     print(f"Output: {output_dir}")
     print(f"Width ratio: {config.cn_width}:{config.en_width} (2:1)")
-    if cn_weight_mapping:
-        print("CN font mapping:")
-        for style in styles:
-            print(f"  {style} -> {cn_font_paths[style].name}")
+    print("Font mapping:")
+    for style in styles:
+        paths = font_paths[style]
+        print(f"  {style}:")
+        print(f"    EN: {paths['en_font_path'].name}")
+        print(f"    CN: {paths['cn_font_path'].name}")
 
     # Build fonts
     if parallel <= 1:
         # Sequential build
         for style in styles:
-            en_font_path = fonts_dir / f"{en_font_prefix}-{style}.ttf"
-            cn_font_path = cn_font_paths[style]
-            build_single_font(style, en_font_path, cn_font_path, output_dir, config)
+            paths = font_paths[style]
+            build_single_font(
+                style,
+                paths["en_font_path"],
+                paths["cn_font_path"],
+                paths["display_name"],
+                output_dir,
+                config,
+                metadata,
+            )
     else:
         # Parallel build
         with ProcessPoolExecutor(max_workers=parallel) as executor:
             futures = {}
             for style in styles:
-                en_font_path = fonts_dir / f"{en_font_prefix}-{style}.ttf"
-                cn_font_path = cn_font_paths[style]
+                paths = font_paths[style]
                 future = executor.submit(
                     build_single_font,
                     style,
-                    en_font_path,
-                    cn_font_path,
+                    paths["en_font_path"],
+                    paths["cn_font_path"],
+                    paths["display_name"],
                     output_dir,
                     config,
+                    metadata,
                 )
                 futures[future] = style
 
@@ -373,7 +350,7 @@ Configuration priority: CLI args > config.yaml > defaults
         "fonts": []
     }
     for style in styles:
-        display_name = config.weight_mapping[style][1]
+        display_name = font_paths[style]["display_name"]
         manifest["fonts"].append({
             "style": style,
             "display_name": display_name,

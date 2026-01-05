@@ -3,55 +3,62 @@
 # Font metadata
 font:
   family_name: "JetBrainsLxgwNerdMono"
-  version: "1.0"
+  version: "1.1"
+  # Author/designer name
+  author: "lvbibir"
+  # Copyright notice (NameID 0)
+  copyright: "Copyright (c) 2024 lvbibir"
+  # Font description (NameID 10)
+  description: "JetBrains Mono NerdFont + LXGW WenKai Mono merged font with 2:1 CJK ratio. English from JetBrains Mono, CJK from LXGW WenKai."
+  # Vendor/Designer URL (NameID 11, 12)
+  url: "https://github.com/lvbibir/JetBrainsLxgwNerdMono"
+  # License description (NameID 13)
+  license: "This font is licensed under the SIL Open Font License, Version 1.1. JetBrains Mono: OFL-1.1, LXGW WenKai: OFL-1.1, Nerd Fonts: MIT."
+  # License URL (NameID 14)
+  license_url: "https://openfontlicense.org"
 
-# Source fonts
-source:
-  # English font filename prefix (files should be named as {prefix}-{style}.ttf)
-  en_font_prefix: "JetBrainsMonoNLNerdFontMono"
-  # Chinese font filename prefix (for multi-weight mode)
-  # Files should be named as {prefix}-{weight}.ttf
-  # cn_font_prefix: "LXGWWenKaiMonoGBScreen"
-  # Chinese font filename (for single-weight mode, used when cn_weight_mapping is not set)
-  cn_font: "LXGWWenKaiMonoGBScreen.ttf"
-  # Source fonts directory
-  fonts_dir: "fonts"
+# Source fonts directory
+fonts_dir: "fonts"
 
-# Weight mapping: style -> display_name
-# Defines available font styles and their display names in font metadata
-# English font files: {en_font_prefix}-{style}.ttf
-weight_mapping:
-  Regular: "Regular"
-  Italic: "Italic"
-  Medium: "Medium"
-  MediumItalic: "Medium Italic"
-  # Add more weights as needed:
-  Bold: "Bold"
-  BoldItalic: "Bold Italic"
-  # Light: "Light"
-  # LightItalic: "Light Italic"
-
-# Chinese font weight mapping (optional)
-# Maps English font styles to Chinese font weights
-# If not set, all styles will use the same cn_font file
-# File naming: {cn_font_prefix}-{cn_weight}.ttf
-#
-# Example for multi-weight Chinese fonts:
-# cn_weight_mapping:
-#   Regular: "Regular"       # -> {cn_font_prefix}-Regular.ttf
-#   Italic: "Regular"        # -> {cn_font_prefix}-Regular.ttf
-#   Medium: "Medium"         # -> {cn_font_prefix}-Medium.ttf
-#   MediumItalic: "Medium"   # -> {cn_font_prefix}-Medium.ttf
-#   Bold: "Medium"           # fallback to Medium if Bold not available
+# Styles configuration
+# Each style specifies:
+#   en_font: English font filename (in fonts_dir)
+#   cn_font: Chinese font filename (in fonts_dir)
+#   display_name: Style name shown in font metadata
+styles:
+  Regular:
+    en_font: "JetBrainsMonoNLNerdFontMono-Regular.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+    display_name: "Regular"
+  Italic:
+    en_font: "JetBrainsMonoNLNerdFontMono-Italic.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+    display_name: "Italic"
+  Medium:
+    en_font: "JetBrainsMonoNLNerdFontMono-Medium.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+    display_name: "Medium"
+  MediumItalic:
+    en_font: "JetBrainsMonoNLNerdFontMono-MediumItalic.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+    display_name: "Medium Italic"
+  Bold:
+    en_font: "JetBrainsMonoNLNerdFontMono-Bold.ttf"
+    cn_font: "LXGWZhenKaiGB-Regular.ttf"
+    display_name: "Bold"
+  BoldItalic:
+    en_font: "JetBrainsMonoNLNerdFontMono-BoldItalic.ttf"
+    cn_font: "LXGWZhenKaiGB-Regular.ttf"
+    display_name: "Bold Italic"
 
 # Build options
 build:
-  # Comma-separated styles to build (must be defined in weight_mapping)
+  # Comma-separated styles to build (must be defined in styles above)
   styles: "Regular,Medium,Italic,MediumItalic,Bold,BoldItalic"
   # Output directory
   output_dir: "output/fonts"
   # Number of parallel workers (1 = sequential)
-  parallel: 1
+  parallel: 6
 
 # Glyph width configuration (2:1 ratio)
 width:

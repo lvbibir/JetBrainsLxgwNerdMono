@@ -7,8 +7,10 @@ JetBrains Mono NerdFont + LXGW WenKai Mono = 2:1 中英文等宽字体
 ## 特性
 
 - 英文字符来自 JetBrains Mono NerdFont
-- 中日韩 (CJK) 字符来自 LXGW 文楷等宽 (GB Screen 版本)
-- 保留 NerdFont 图标
+- 中日韩 (CJK) 字符来自霞鹜文楷屏幕阅读版等宽 GB (Regular/Medium) 和霞鹜臻楷 GB (Bold)
+- 保留 NerdFont 图标并缩放至与中文等宽
+  - Powerline 符号 (U+E0A0-U+E0DF) 保持原始垂直边界, 确保终端中正确对齐
+  - 普通图标缩放 1.4 倍并垂直居中
 - 完美 2:1 宽度比例 (中文 1200, 英文 600 FUnit)
 - 字重: Regular, Medium, Italic, MediumItalic, Bold, BoldItalic
 - 支持 YAML 配置文件, 可通过命令行覆盖
@@ -64,11 +66,17 @@ docker run --rm \
 - `JetBrainsMonoNLNerdFontMono-Bold.ttf`
 - `JetBrainsMonoNLNerdFontMono-BoldItalic.ttf`
 
-### LXGW 文楷等宽 GB Screen (v1.521)
+### 霞鹜文楷屏幕阅读版等宽 GB (v1.521)
 
 直接下载: [LXGWWenKaiMonoGBScreen.ttf](https://github.com/lxgw/LxgwWenKai-Screen/releases/download/v1.521/LXGWWenKaiMonoGBScreen.ttf)
 
-- `LXGWWenKaiMonoGBScreen.ttf`
+- `LXGWWenKaiMonoGBScreen.ttf` - 用于 Regular/Italic/Medium/MediumItalic 字重
+
+### 霞鹜臻楷 GB (用于 Bold 字重)
+
+直接下载: [LXGWZhenKaiGB-Regular.ttf](https://github.com/lxgw/LxgwZhenKai/releases)
+
+- `LXGWZhenKaiGB-Regular.ttf` - 用于 Bold/BoldItalic 字重, 提供更粗的中文笔画
 
 ## 输出
 
@@ -138,7 +146,6 @@ uv run python -m http.server 8000
 ```
 用法: build.py [-h] [--config CONFIG] [--styles STYLES] [--fonts-dir FONTS_DIR]
                 [--output-dir OUTPUT_DIR] [--parallel PARALLEL]
-                [--cn-font CN_FONT] [--en-font-prefix EN_FONT_PREFIX]
 
 选项:
   --config CONFIG         配置文件路径 (默认: config.yaml)
@@ -146,8 +153,6 @@ uv run python -m http.server 8000
   --fonts-dir FONTS_DIR   源字体目录 (默认: fonts/)
   --output-dir OUTPUT_DIR 输出目录 (默认: output/fonts/)
   --parallel PARALLEL     并行工作进程数 (默认: 1)
-  --cn-font CN_FONT       中文字体文件名
-  --en-font-prefix EN_FONT_PREFIX  英文字体文件名前缀
 ```
 
 配置优先级: 命令行参数 > config.yaml > 默认值
@@ -160,28 +165,53 @@ uv run python -m http.server 8000
 # 字体元数据
 font:
   family_name: "JetBrainsLxgwNerdMono"
-  version: "1.0"
+  version: "1.1"
+  author: "lvbibir"
+  copyright: "Copyright (c) 2024 lvbibir"
+  description: "JetBrains Mono NerdFont + LXGW WenKai Mono merged font with 2:1 CJK ratio."
+  url: "https://github.com/lvbibir/JetBrainsLxgwNerdMono"
+  license: "This font is licensed under the SIL Open Font License, Version 1.1."
+  license_url: "https://openfontlicense.org"
 
-# 源字体
-source:
-  en_font_prefix: "JetBrainsMonoNLNerdFontMono"  # 英文字体文件名前缀
-  cn_font: "LXGWWenKaiMonoGBScreen.ttf"          # 中文字体文件名
-  fonts_dir: "fonts"
+# 源字体目录
+fonts_dir: "fonts"
 
-# 字重映射: 样式 -> 显示名称
-weight_mapping:
-  Regular: "Regular"
-  Italic: "Italic"
-  Medium: "Medium"
-  MediumItalic: "Medium Italic"
-  Bold: "Bold"
-  BoldItalic: "Bold Italic"
+# 字重配置
+# 每个字重需要指定:
+#   en_font: 英文字体文件名 (位于 fonts_dir)
+#   cn_font: 中文字体文件名 (位于 fonts_dir)
+#   display_name: 字体元数据中显示的样式名称
+styles:
+  Regular:
+    en_font: "JetBrainsMonoNLNerdFontMono-Regular.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+    display_name: "Regular"
+  Italic:
+    en_font: "JetBrainsMonoNLNerdFontMono-Italic.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+    display_name: "Italic"
+  Medium:
+    en_font: "JetBrainsMonoNLNerdFontMono-Medium.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+    display_name: "Medium"
+  MediumItalic:
+    en_font: "JetBrainsMonoNLNerdFontMono-MediumItalic.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
+    display_name: "Medium Italic"
+  Bold:
+    en_font: "JetBrainsMonoNLNerdFontMono-Bold.ttf"
+    cn_font: "LXGWZhenKaiGB-Regular.ttf"  # 使用较粗的中文字体
+    display_name: "Bold"
+  BoldItalic:
+    en_font: "JetBrainsMonoNLNerdFontMono-BoldItalic.ttf"
+    cn_font: "LXGWZhenKaiGB-Regular.ttf"
+    display_name: "Bold Italic"
 
 # 构建选项
 build:
   styles: "Regular,Medium,Italic,MediumItalic,Bold,BoldItalic"
   output_dir: "output/fonts"
-  parallel: 1
+  parallel: 6
 
 # 字形宽度配置 (2:1 比例)
 width:
@@ -189,21 +219,24 @@ width:
   cn_width: 1200
 ```
 
-### 多字重中文字体支持
+### 多字重中文字体示例
 
-如果中文字体有多个字重, 可以配置 `cn_font_prefix` 和 `cn_weight_mapping`:
+如果中文字体有多个字重, 为每个样式指定不同的 `cn_font`:
 
 ```yaml
-source:
-  cn_font_prefix: "LXGWWenKaiMonoGBScreen"  # 文件: {prefix}-{weight}.ttf
-
-cn_weight_mapping:
-  Regular: "Regular"      # -> LXGWWenKaiMonoGBScreen-Regular.ttf
-  Italic: "Regular"
-  Medium: "Medium"        # -> LXGWWenKaiMonoGBScreen-Medium.ttf
-  MediumItalic: "Medium"
-  Bold: "Medium"          # 如果没有 Bold 则回退到 Medium
-  BoldItalic: "Medium"
+styles:
+  Regular:
+    en_font: "JetBrainsMonoNLNerdFontMono-Regular.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen-Regular.ttf"
+    display_name: "Regular"
+  Medium:
+    en_font: "JetBrainsMonoNLNerdFontMono-Medium.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen-Medium.ttf"
+    display_name: "Medium"
+  Bold:
+    en_font: "JetBrainsMonoNLNerdFontMono-Bold.ttf"
+    cn_font: "LXGWWenKaiMonoGBScreen-Medium.ttf"  # 回退到 Medium
+    display_name: "Bold"
 ```
 
 ### 分包脚本 (split.py)
@@ -242,7 +275,8 @@ cn_weight_mapping:
 
 - [maple-font](https://github.com/subframe7536/maple-font): 本项目的实现方案参考来源
 - [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts): 提供了丰富的开发者图标
-- [LXGW WenKai](https://github.com/lxgw/LxgwWenKai): 优秀的开源中文字体
+- [霞鹜文楷](https://github.com/lxgw/LxgwWenKai): 优秀的开源中文字体
+- [霞鹜臻楷](https://github.com/lxgw/LxgwZhenKai): 霞鹜文楷的粗体版本
 - [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono): 优秀的编程等宽字体
 - [cn-font-split](https://github.com/KonghaYao/cn-font-split): 强大的 Web 字体分包工具
 
@@ -251,5 +285,6 @@ cn_weight_mapping:
 本项目仅供个人使用。请查看源字体的许可证:
 
 - JetBrains Mono: OFL-1.1
-- LXGW WenKai: OFL-1.1
+- 霞鹜文楷: OFL-1.1
+- 霞鹜臻楷: OFL-1.1
 - Nerd Fonts: MIT
