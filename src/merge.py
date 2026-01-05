@@ -166,9 +166,26 @@ def merge_fonts(
     base_font["maxp"].numGlyphs = len(new_glyph_order)
 
     # Update cmap with new glyphs
-    for codepoint, glyph_name in cjk_cmap.items():
-        if glyph_name in glyphs_added and codepoint not in base_cmap:
-            base_cmap[codepoint] = glyph_name
+    # IMPORTANT: Must update all cmap subtables, not just getBestCmap()
+    # Office applications may only read format=4 table for BMP characters
+    glyphs_added_set = set(glyphs_added)
+    for table in base_font["cmap"].tables:
+        # Only update tables that map Unicode codepoints
+        if table.platformID == 3 and table.platEncID in (1, 10):  # Windows Unicode BMP/Full
+            for codepoint, glyph_name in cjk_cmap.items():
+                if glyph_name in glyphs_added_set:
+                    # format=4 only supports BMP (U+0000-U+FFFF)
+                    if table.format == 4 and codepoint > 0xFFFF:
+                        continue
+                    if codepoint not in table.cmap:
+                        table.cmap[codepoint] = glyph_name
+        elif table.platformID == 0:  # Unicode platform
+            for codepoint, glyph_name in cjk_cmap.items():
+                if glyph_name in glyphs_added_set:
+                    if table.format == 4 and codepoint > 0xFFFF:
+                        continue
+                    if codepoint not in table.cmap:
+                        table.cmap[codepoint] = glyph_name
 
     # Update hhea table
     if "hhea" in base_font:
