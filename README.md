@@ -165,7 +165,7 @@ The `config.yaml` file provides centralized configuration for the build process:
 # Font metadata
 font:
   family_name: "JetBrainsLxgwNerdMono"
-  version: "1.1"
+  version: "1.3"
   author: "lvbibir"
   copyright: "Copyright (c) 2024 lvbibir"
   description: "JetBrains Mono NerdFont + LXGW WenKai Mono merged font with 2:1 CJK ratio."
@@ -177,35 +177,12 @@ font:
 fonts_dir: "fonts"
 
 # Styles configuration
-# Each style specifies:
-#   en_font: English font filename (in fonts_dir)
-#   cn_font: Chinese font filename (in fonts_dir)
-#   display_name: Style name shown in font metadata
 styles:
   Regular:
     en_font: "JetBrainsMonoNLNerdFontMono-Regular.ttf"
     cn_font: "LXGWWenKaiMonoGBScreen.ttf"
     display_name: "Regular"
-  Italic:
-    en_font: "JetBrainsMonoNLNerdFontMono-Italic.ttf"
-    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
-    display_name: "Italic"
-  Medium:
-    en_font: "JetBrainsMonoNLNerdFontMono-Medium.ttf"
-    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
-    display_name: "Medium"
-  MediumItalic:
-    en_font: "JetBrainsMonoNLNerdFontMono-MediumItalic.ttf"
-    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
-    display_name: "Medium Italic"
-  Bold:
-    en_font: "JetBrainsMonoNLNerdFontMono-Bold.ttf"
-    cn_font: "LXGWZhenKaiGB-Regular.ttf"  # Use heavier Chinese font for Bold
-    display_name: "Bold"
-  BoldItalic:
-    en_font: "JetBrainsMonoNLNerdFontMono-BoldItalic.ttf"
-    cn_font: "LXGWZhenKaiGB-Regular.ttf"
-    display_name: "Bold Italic"
+  # ... other styles
 
 # Build options
 build:
@@ -217,6 +194,8 @@ build:
 width:
   en_width: 600
   cn_width: 1200
+  # CJK visual scale factor (1.0 = no extra scaling, 1.08 = 8% larger)
+  visual_scale: 1.08
 ```
 
 ### Multi-Weight Chinese Font Example

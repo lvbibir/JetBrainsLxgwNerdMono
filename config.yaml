@@ -15,6 +15,7 @@ font:
 fonts_dir: "fonts"
 
 # Styles configuration
+# Each style maps: en_font (English), cn_font (CJK), display_name (metadata)
 styles:
   Regular:
     en_font: "JetBrainsMonoNLNerdFontMono-Regular.ttf"
@@ -43,13 +44,13 @@ styles:
 
 # Build options
 build:
-  styles: "Regular,Medium,Italic,MediumItalic,Bold,BoldItalic"
+  styles: "Regular,Medium,Italic,MediumItalic,Bold,BoldItalic"  # Comma-separated
   output_dir: "output/fonts"
-  parallel: 6
+  parallel: 6  # Number of parallel workers
 
 # Glyph width configuration (2:1 ratio)
 width:
   en_width: 600
   cn_width: 1200
-  # CJK visual scale factor (1.0 = no extra scaling, 1.10 = 10% larger)
-  visual_scale: 1.10
+  # CJK visual scale factor (1.0 = no extra scaling, 1.08 = 8% larger)
+  visual_scale: 1.08

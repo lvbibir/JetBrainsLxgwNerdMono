@@ -165,7 +165,7 @@ uv run python -m http.server 8000
 # 字体元数据
 font:
   family_name: "JetBrainsLxgwNerdMono"
-  version: "1.1"
+  version: "1.3"
   author: "lvbibir"
   copyright: "Copyright (c) 2024 lvbibir"
   description: "JetBrains Mono NerdFont + LXGW WenKai Mono merged font with 2:1 CJK ratio."
@@ -177,35 +177,12 @@ font:
 fonts_dir: "fonts"
 
 # 字重配置
-# 每个字重需要指定:
-#   en_font: 英文字体文件名 (位于 fonts_dir)
-#   cn_font: 中文字体文件名 (位于 fonts_dir)
-#   display_name: 字体元数据中显示的样式名称
 styles:
   Regular:
     en_font: "JetBrainsMonoNLNerdFontMono-Regular.ttf"
     cn_font: "LXGWWenKaiMonoGBScreen.ttf"
     display_name: "Regular"
-  Italic:
-    en_font: "JetBrainsMonoNLNerdFontMono-Italic.ttf"
-    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
-    display_name: "Italic"
-  Medium:
-    en_font: "JetBrainsMonoNLNerdFontMono-Medium.ttf"
-    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
-    display_name: "Medium"
-  MediumItalic:
-    en_font: "JetBrainsMonoNLNerdFontMono-MediumItalic.ttf"
-    cn_font: "LXGWWenKaiMonoGBScreen.ttf"
-    display_name: "Medium Italic"
-  Bold:
-    en_font: "JetBrainsMonoNLNerdFontMono-Bold.ttf"
-    cn_font: "LXGWZhenKaiGB-Regular.ttf"  # 使用较粗的中文字体
-    display_name: "Bold"
-  BoldItalic:
-    en_font: "JetBrainsMonoNLNerdFontMono-BoldItalic.ttf"
-    cn_font: "LXGWZhenKaiGB-Regular.ttf"
-    display_name: "Bold Italic"
+  # ... 其他字重
 
 # 构建选项
 build:
@@ -217,6 +194,8 @@ build:
 width:
   en_width: 600
   cn_width: 1200
+  # CJK 视觉缩放因子 (1.0 = 无缩放, 1.08 = 放大 8%)
+  visual_scale: 1.08
 ```
 
 ### 多字重中文字体示例
