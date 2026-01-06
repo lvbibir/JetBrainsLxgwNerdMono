@@ -3,28 +3,18 @@
 # Font metadata
 font:
   family_name: "JetBrainsLxgwNerdMono"
-  version: "1.2"
-  # Author/designer name
+  version: "1.3"
   author: "lvbibir"
-  # Copyright notice (NameID 0)
   copyright: "Copyright (c) 2024 lvbibir"
-  # Font description (NameID 10)
   description: "JetBrains Mono NerdFont + LXGW WenKai Mono merged font with 2:1 CJK ratio. English from JetBrains Mono, CJK from LXGW WenKai."
-  # Vendor/Designer URL (NameID 11, 12)
   url: "https://github.com/lvbibir/JetBrainsLxgwNerdMono"
-  # License description (NameID 13)
   license: "This font is licensed under the SIL Open Font License, Version 1.1. JetBrains Mono: OFL-1.1, LXGW WenKai: OFL-1.1, Nerd Fonts: MIT."
-  # License URL (NameID 14)
   license_url: "https://openfontlicense.org"
 
 # Source fonts directory
 fonts_dir: "fonts"
 
 # Styles configuration
-# Each style specifies:
-#   en_font: English font filename (in fonts_dir)
-#   cn_font: Chinese font filename (in fonts_dir)
-#   display_name: Style name shown in font metadata
 styles:
   Regular:
     en_font: "JetBrainsMonoNLNerdFontMono-Regular.ttf"
@@ -53,14 +43,13 @@ styles:
 
 # Build options
 build:
-  # Comma-separated styles to build (must be defined in styles above)
   styles: "Regular,Medium,Italic,MediumItalic,Bold,BoldItalic"
-  # Output directory
   output_dir: "output/fonts"
-  # Number of parallel workers (1 = sequential)
   parallel: 6
 
 # Glyph width configuration (2:1 ratio)
 width:
-  en_width: 600   # English character width
-  cn_width: 1200  # CJK character width (2x)
+  en_width: 600
+  cn_width: 1200
+  # CJK visual scale factor (1.0 = no extra scaling, 1.10 = 10% larger)
+  visual_scale: 1.10

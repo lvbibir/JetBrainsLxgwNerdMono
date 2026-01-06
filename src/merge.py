@@ -97,28 +97,11 @@ def merge_fonts(
     base_upm = base_font["head"].unitsPerEm
     cn_upm = cn_font["head"].unitsPerEm
 
-    # Strategy:
-    # LXGW WenKai Mono glyphs don't fill the entire em square
-    # - UPM: 2048
-    # - Actual glyph width: ~1724 (average of CJK characters)
-    # - After UPM normalization to 1000: ~841
-    #
-    # We want final glyph width ~809 (like MapleMono, ~67% of 1200 advance)
-    # So scale factor: 809 / 841 = 0.962
-    #
-    # But we need to be conservative to avoid overflow
-    # Let's target ~800 width (2/3 of 1200 advance)
-
-    upm_scale = base_upm / cn_upm  # 1000 / 2048 = 0.4883
-
-    # After UPM scale, average LXGW glyph is: 1724 * 0.4883 = 841 units
-    # Target: ~860 units (similar to MapleMono's ~809-918 range)
-    # Visual scale: 860 / 841 = 1.023
-    visual_scale = 1.02
-
-    combined_scale = upm_scale * visual_scale
-
-    print(f"  Scaling CN glyphs by {combined_scale:.4f} (UPM: {cn_upm} -> {base_upm}, visual: {visual_scale:.2f}x)")
+    # UPM normalization scale with visual adjustment
+    # visual_scale adjusts the final glyph size (1.08 = 8% larger)
+    upm_scale = base_upm / cn_upm  # e.g., 1000 / 2048 = 0.4883
+    combined_scale = upm_scale * config.visual_scale
+    print(f"  Scaling CN glyphs by {combined_scale:.4f} (UPM: {cn_upm} -> {base_upm}, visual: {config.visual_scale:.2f}x)")
 
     glyphs_added = []
 
@@ -149,8 +132,10 @@ def merge_fonts(
             glyph.recalcBounds(base_glyf)
 
         # Set advance width to cn_width (1200) for 2:1 ratio
-        # LSB will be recalculated in center_cjk_glyphs()
-        base_hmtx.metrics[glyph_name] = (config.cn_width, 0)
+        # Preserve original LSB ratio for proper glyph positioning
+        orig_width, orig_lsb = cn_hmtx[glyph_name]
+        scaled_lsb = int(orig_lsb * combined_scale)
+        base_hmtx.metrics[glyph_name] = (config.cn_width, scaled_lsb)
 
         glyphs_added.append(glyph_name)
 
@@ -328,7 +313,10 @@ def scale_nerd_icons(font: TTFont, config: FontConfig) -> None:
 def center_cjk_glyphs(font: TTFont, config: FontConfig) -> None:
     """Center CJK glyphs within their advance width.
 
-    This ensures glyphs are visually centered in the 1200-unit space.
+    Only centers glyphs that occupy more than half the advance width.
+    Narrow glyphs (like punctuation) keep their original position,
+    except for paired punctuation (brackets, quotes) which are aligned
+    to their respective sides.
 
     Args:
         font: TTFont object
@@ -336,7 +324,53 @@ def center_cjk_glyphs(font: TTFont, config: FontConfig) -> None:
     """
     glyf = font["glyf"]
     hmtx = font["hmtx"]
+    cmap = font["cmap"].getBestCmap()
     cjk_glyphs = get_cjk_glyphs(font, config)
+
+    # Paired punctuation: left-side chars should align right, right-side should align left
+    # These are codepoints for opening/closing brackets and quotes
+    left_punctuation = {
+        0x3010,  # 【
+        0x300A,  # 《
+        0x3008,  # 〈
+        0x300C,  # 「
+        0x300E,  # 『
+        0x3014,  # 〔
+        0x3016,  # 〖
+        0x3018,  # 〘
+        0x301A,  # 〚
+        0xFF08,  # （
+        0xFF3B,  # ［
+        0xFF5B,  # ｛
+        0x2018,  # '
+        0x201C,  # "
+    }
+    right_punctuation = {
+        0x3011,  # 】
+        0x300B,  # 》
+        0x3009,  # 〉
+        0x300D,  # 」
+        0x300F,  # 』
+        0x3015,  # 〕
+        0x3017,  # 〗
+        0x3019,  # 〙
+        0x301B,  # 〛
+        0xFF09,  # ）
+        0xFF3D,  # ］
+        0xFF5D,  # ｝
+        0x2019,  # '
+        0x201D,  # "
+    }
+
+    # Build reverse cmap: glyph_name -> codepoint
+    glyph_to_codepoint = {}
+    if cmap:
+        for cp, gn in cmap.items():
+            glyph_to_codepoint[gn] = cp
+
+    centered_count = 0
+    skipped_count = 0
+    paired_count = 0
 
     for glyph_name in cjk_glyphs:
         if glyph_name not in glyf.glyphs:
@@ -358,6 +392,37 @@ def center_cjk_glyphs(font: TTFont, config: FontConfig) -> None:
             continue
 
         glyph_width = glyph.xMax - glyph.xMin
+        codepoint = glyph_to_codepoint.get(glyph_name, 0)
+
+        # Handle paired punctuation specially
+        if codepoint in left_punctuation:
+            # Left punctuation (opening): align to right side
+            ideal_lsb = config.cn_width - glyph_width
+            delta = ideal_lsb - glyph.xMin
+            if abs(delta) > 1:
+                glyph.coordinates.translate((delta, 0))
+                glyph.recalcBounds(glyf)
+                hmtx[glyph_name] = (config.cn_width, ideal_lsb)
+            paired_count += 1
+            continue
+
+        if codepoint in right_punctuation:
+            # Right punctuation (closing): align to left side
+            ideal_lsb = 0
+            delta = ideal_lsb - glyph.xMin
+            if abs(delta) > 1:
+                glyph.coordinates.translate((delta, 0))
+                glyph.recalcBounds(glyf)
+                hmtx[glyph_name] = (config.cn_width, ideal_lsb)
+            paired_count += 1
+            continue
+
+        # Only center glyphs that occupy more than half the advance width
+        # Narrow glyphs (like punctuation) keep their original position
+        if glyph_width <= config.cn_width // 2:
+            skipped_count += 1
+            continue
+
         # Calculate centering offset
         ideal_lsb = (config.cn_width - glyph_width) // 2
         delta = ideal_lsb - glyph.xMin
@@ -366,3 +431,6 @@ def center_cjk_glyphs(font: TTFont, config: FontConfig) -> None:
             glyph.coordinates.translate((delta, 0))
             glyph.recalcBounds(glyf)
             hmtx[glyph_name] = (config.cn_width, ideal_lsb)
+            centered_count += 1
+
+    print(f"    Centered: {centered_count}, Paired punctuation: {paired_count}, Skipped (narrow): {skipped_count}")

@@ -101,6 +101,7 @@ def build_single_font(
         config=config,
     )
 
+    # Monospace-specific processing
     # Scale NerdFont icons to CJK width
     print("  Scaling NerdFont icons...")
     scale_nerd_icons(merged_font, config)
@@ -231,6 +232,7 @@ Configuration priority: CLI args > config.yaml > defaults
     version = get_config_value(yaml_config, "font", "version") or "1.0"
     en_width = get_config_value(yaml_config, "width", "en_width", default=600)
     cn_width = get_config_value(yaml_config, "width", "cn_width", default=1200)
+    visual_scale = get_config_value(yaml_config, "width", "visual_scale", default=1.08)
 
     # Font metadata for name table
     metadata = {
@@ -247,6 +249,7 @@ Configuration priority: CLI args > config.yaml > defaults
         family_name=family_name,
         family_name_compact=family_name,
         version=version,
+        visual_scale=visual_scale,
         en_width=en_width,
         cn_width=cn_width,
     )

@@ -13,6 +13,9 @@ class FontConfig:
     family_name_compact: str = "JetBrainsLxgwNerdMono"
     version: str = "1.0"
 
+    # CJK visual scale factor (1.0 = no extra scaling, 1.08 = 8% larger)
+    visual_scale: float = 1.08
+
     # Glyph width configuration (2:1 ratio)
     en_width: int = 600  # English character width
     cn_width: int = 1200  # CJK character width (2x)
