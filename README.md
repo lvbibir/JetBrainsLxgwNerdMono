@@ -16,6 +16,51 @@ JetBrains Mono NerdFont + LXGW WenKai Mono = 2:1 CJK Monospace Font
 - YAML configuration support with CLI override
 - Multi-weight Chinese font mapping (optional)
 
+## Download
+
+### Quick Selection
+
+| Use Case | Download |
+|----------|----------|
+| 💻 **Local Install** (Editor/IDE/Terminal) | `JetBrainsLxgwNerdMono.zip` |
+| 🌐 **Web Usage** (Web Fonts) | `JetBrainsLxgwNerdMono-split-woff2.zip` |
+| 📄 **Single Weight Only** | Choose the corresponding `.ttf` file |
+
+### File Description
+
+#### `JetBrainsLxgwNerdMono.zip`
+> **Recommended for most users**
+
+Contains 6 complete TTF font files with all weights, suitable for:
+- ✅ VSCode / JetBrains IDE / Sublime Text and other editors
+- ✅ Windows Terminal / iTerm2 / Alacritty and other terminals
+- ✅ System-wide installation
+
+Included weights: Regular, Medium, Italic, MediumItalic, Bold, BoldItalic
+
+#### `JetBrainsLxgwNerdMono-split-woff2.zip`
+> **For Web developers**
+
+WOFF2 format optimized with [cn-font-split](https://github.com/KonghaYao/cn-font-split), suitable for:
+- ✅ Website/blog `@font-face` references
+- ✅ On-demand loading of CJK character subsets
+- ✅ Web projects requiring optimal loading performance
+
+Includes `all.css` for importing all weights at once
+
+#### Single Font Files (`.ttf`)
+
+If you only need a specific weight, download the corresponding file directly:
+
+| File | Weight | Use Case |
+|------|--------|----------|
+| `JetBrainsLxgwNerdMono-Regular.ttf` | Regular | Daily coding (Recommended) |
+| `JetBrainsLxgwNerdMono-Medium.ttf` | Medium | Prefer slightly bolder font |
+| `JetBrainsLxgwNerdMono-Bold.ttf` | Bold | Headings/emphasis |
+| `JetBrainsLxgwNerdMono-Italic.ttf` | Italic | Comments/variables |
+| `JetBrainsLxgwNerdMono-MediumItalic.ttf` | Medium Italic | - |
+| `JetBrainsLxgwNerdMono-BoldItalic.ttf` | Bold Italic | - |
+
 ## Quick Start
 
 ### Using uv (Recommended)

@@ -16,6 +16,51 @@ JetBrains Mono NerdFont + LXGW WenKai Mono = 2:1 中英文等宽字体
 - 支持 YAML 配置文件, 可通过命令行覆盖
 - 支持多字重中文字体映射 (可选)
 
+## 下载
+
+### 快速选择
+
+| 使用场景 | 下载文件 |
+|---------|---------|
+| 💻 **本地安装** (编辑器/IDE/终端) | `JetBrainsLxgwNerdMono.zip` |
+| 🌐 **网页使用** (Web Fonts) | `JetBrainsLxgwNerdMono-split-woff2.zip` |
+| 📄 **只需单个字重** | 选择对应的 `.ttf` 单文件 |
+
+### 文件说明
+
+#### `JetBrainsLxgwNerdMono.zip`
+> **推荐大多数用户下载**
+
+包含 6 个字重的完整 TTF 字体文件, 适用于:
+- ✅ VSCode / JetBrains IDE / Sublime Text 等编辑器
+- ✅ Windows Terminal / iTerm2 / Alacritty 等终端
+- ✅ 系统全局安装
+
+包含字重: Regular, Medium, Italic, MediumItalic, Bold, BoldItalic
+
+#### `JetBrainsLxgwNerdMono-split-woff2.zip`
+> **Web 开发者专用**
+
+经过 [cn-font-split](https://github.com/KonghaYao/cn-font-split) 分包优化的 WOFF2 格式, 适用于:
+- ✅ 网站/博客的 `@font-face` 引用
+- ✅ 需要按需加载中文字符子集的场景
+- ✅ 追求极致加载性能的 Web 项目
+
+包含 `all.css` 可直接引用全部字重
+
+#### 单字体文件 (`.ttf`)
+
+如果你只需要特定字重, 可直接下载对应文件:
+
+| 文件名 | 字重 | 适用场景 |
+|-------|------|---------|
+| `JetBrainsLxgwNerdMono-Regular.ttf` | 常规 | 日常编码 (推荐) |
+| `JetBrainsLxgwNerdMono-Medium.ttf` | 中等 | 偏好稍粗字体 |
+| `JetBrainsLxgwNerdMono-Bold.ttf` | 粗体 | 标题/强调 |
+| `JetBrainsLxgwNerdMono-Italic.ttf` | 斜体 | 注释/变量 |
+| `JetBrainsLxgwNerdMono-MediumItalic.ttf` | 中等斜体 | - |
+| `JetBrainsLxgwNerdMono-BoldItalic.ttf` | 粗斜体 | - |
+
 ## 快速开始
 
 ### 使用 uv (推荐)
